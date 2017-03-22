@@ -1,0 +1,272 @@
+2007-09-02  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* version.m4, NEWS: Bump to 1.0.2.
+
+2007-09-02  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* NEWS: Update.
+
+2007-09-02  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: New feature: includes support.
+	* README, README.ja: Ditto.
+
+	* README, README.ja: Add the description of initialization, and
+	the section `Examples'.
+
+2007-09-02  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Fix a typo in the help message.
+
+	* README, README.ja: Refine.
+
+2007-09-02  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* README, README.ja: Add the description of `--shift-left', and
+	the section `Generated Codes and Operation Costs'.
+
+2007-09-01  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/prng_sample_c.c: Fix a bug on sizeof(long) != 4.
+	* src/prng_sample_cplusplus.cc: Ditto.
+
+	* configure.ac: Add a check for sizeof(long).
+
+2007-08-27  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Refine internally.
+
+2007-08-26  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Add URL to the help message.
+
+	* README, README.ja: Fix URL.
+
+2007-08-26  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Refine handling of options.
+
+	* src/prng_sample_c.c, src/prng_sample_cplusplus.cc: New samples.
+
+	* configure.ac, src/Makefile.am: Change for added samples.
+	* build-aux/config.h.in, build-aux/depcomp: New files for added
+	samples.
+
+2007-08-26  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Fix confusions of shift-direction.
+	* README, README.ja, NEWS: Ditto.
+	* src/*-test.in: Ditto.
+
+2007-08-25  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: New feature: shift-right support.
+	* README, README.ja, NEWS: Ditto.
+
+	* src/shift_lfsr_test.c, src/test-engine.in: Add support for
+	shift-right.
+
+	* src/fibonacci-singleshift-test.in: Add tests for shift-right.
+	* src/fibonacci-multishift-test.in, src/galois-test.in: Ditto.
+
+2007-08-25  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: New option: `--no-auto'.
+	* README, README.ja, NEWS: Ditto.
+
+2007-08-19  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: New features: function qualifier support,
+	C++ support (function template, namespace, correct casting).
+	* src/lfsr-generator.in: New options: `--function-qualifier',
+	`--function-template', `--language=STRING', `--namespace=STRING'
+	and `--no-extern-c-guard'.
+	* README, README.ja, NEWS: Ditto.
+
+2007-08-19  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: New internal packages: PackageInfo and
+	ParameterSet.
+
+	* src/lfsr-generator.in: New options: `--include-guard' and
+	`--prototype'.  `--header' is now equivalent to `--include-guard
+	--prototype'.
+	* README, README.ja: Ditto.
+
+2007-08-11  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* version.m4, NEWS: Bump to 1.0.1.
+
+2007-08-11  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Change the option: `--target=header' ->
+	`--header'.
+	* src/lfsr-generator.in: Change the style of the help message.
+	* README, README.ja: Ditto.
+
+2007-08-10  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* README, README.ja: Fix typo.
+
+2007-08-10  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* version.m4, NEWS: Bump to 1.0.0.
+
+2007-08-10  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* all: Import to SourceForge.net.
+
+	* README, README.ja: Update the location information.
+
+2007-08-09  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Refine internally.
+
+2007-08-08  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Refine internally.
+
+2007-08-08  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Change the indentation of the expresstion
+	of Fibonacci.
+
+2007-08-08  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Fix bugs on printf formats.
+
+	* src/lfsr-generator.in: Add typedefs to generated source codes.
+
+	* src/*-test.in, src/test-engine.in: Refine.
+
+2007-08-07  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/test-engine.in: Remove a temporary file to store a result of
+	a test, again.
+
+2007-08-07  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: More comfortable with older Perl
+	versions: 5.005 is now ok, maybe.
+	* src/test-engine.in: Ditto.
+	* README, README.ja: Update the description of Perl.
+
+	* src/lfsr-generator.in: More comfortable on some poor
+	environments.
+	* src/*-test.in: Ditto.
+
+	* src/shift_lfsr_test.c: Add some const qualifiers.
+
+2007-08-07  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/fibonacci-singleshift-test.in: Enable supporting restricted
+	environments, whose (sizeof(unsigned int) * CHAR_BIT) is 16:
+	smallest size permitted by the standard C.
+	* src/fibonacci-multishift-test.in, src/galois-test.in: Ditto.
+
+	* src/shift_lfsr_test.c: Fix the format string bug of printf, used
+	to show periods of LFSRs.
+
+2007-08-07  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Add an infomative comment for
+	`extern "C"' to generated source codes.
+
+	* README, README.ja: Refine.
+
+2007-08-06  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Change the license of generated source
+	codes: GPL -> MIT.
+
+	* README, README.ja: Set the license of generated source codes.
+
+	* src/Makefile.am: Add missing dependencies.
+
+2007-08-06  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* README, README.ja: Refine.
+
+2007-08-05  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* README.ja: Refine and fix a typo of a sample code.
+
+	* README: Add texts.
+
+2007-08-05  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* README: Add texts, partially.
+
+2007-08-05  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Refine an error message.
+
+	* README.ja: Refine.
+
+	* README: Add texts, partially.
+
+2007-08-05  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Refine internally.
+
+2007-08-05  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Refine internally.
+
+	* README, README.ja: Refine.
+
+2007-08-05  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Add shift amounts checker for Fibonacci
+	LFSRs.
+
+	* README.ja: New document.
+	* Makefile.am: Change for the document.
+
+	* README, NEWS: Add texts, partially.
+
+2007-08-04  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/fibonacci-multishift-test.in: Add a short period test.
+	* src/galois-test.in: Ditto.
+
+2007-08-04  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Add support for the Galois configuration
+	of the LFSR.
+
+	* src/galois-test.in: New test.
+	* configure.ac, src/Makefile.am: Change for the test.
+
+	* src/fibonacci-*-test.in, src/test-engine.in: Be more comfortable
+	on debugging.
+
+	* src/galois-test.in: Suppress an unneeded compiler warning.
+
+2007-08-04  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/lfsr-generator.in: Change indexing of taps: start from right
+	-> start from left.
+	* src/fibonacci-singleshift-test.in: Ditto.
+
+	* src/fibonacci-multishift-test.in: New test.
+	* configure.ac, src/Makefile.am: Change for the test.
+
+2007-08-04  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* src/fibonacci-singleshift-test.in: New test.
+
+	* src/shift_lfsr_test.c, src/test-engine.in: New part of the
+	test suite.
+
+	* configure.ac, src/Makefile.am: Change for added files and tests.
+
+	* configure.ac: Add AC_CHECK_PROG_CC.
+
+	* src/lfsr-generator.in: Change header style of generated source
+	codes.
+
+2007-08-04  Wakabayashi Masaki  <r-gray@users.sourceforge.net>
+
+	* Initial revision.
+

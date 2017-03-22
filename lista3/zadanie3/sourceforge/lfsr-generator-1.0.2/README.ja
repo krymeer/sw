@@ -1,0 +1,394 @@
+README (日本語版)
+*****************
+
+はじめに
+========
+
+`lfsr-generator' は、LFSR(Linear Feedback Shift Register: 線形フィード
+バックシフトレジスタ)の状態遷移を行うプログラムのソースコードを生成する
+ツールである。
+
+LFSRは、シフトレジスタと、前状態から新たな1ビットを生成するための線形
+フィードバック関数との組み合わせで構成される状態遷移機械である。例えば:
+
+  x[i]  (x[i] = {0, 1}, i:1..4)
+
+という4ビットの長さを持つ状態変数に対し、次状態 x'[i] を:
+
+  x'[i] = x[i - 1]     (i: 2..4)
+  x'[i] = x[4] ^ x[1]  (i: 1)        ※`^'はXOR(排他的論理和)
+
+と定義するような状態遷移関数を与えることで、周期 2^4 - 1 のLFSRを構成
+できる。一般に、nビットのLFSRは、適切なフィードバック関数を与えること
+で周期を 2^n - 1 にすることができる。フィードバック関数の演算量が少な
+いことから、LFSRは簡易で高速な疑似乱数生成器として使用される。
+
+lfsr-generator は、LFSRの現状態を引数に取り次状態を返すという1つの関数
+を定義するCのソースコードを出力する。例えば上記のLFSRを得るには:
+
+  $ lfsr-generator --length=4 --taps=4,1 --shift-amounts=1 > shift_lfsr.c
+
+などとすればよい。詳細は本文書内の `使い方' を参照のこと。
+
+適切なフィードバック関数を得るための `タップ数列' の選択、Fibonacci
+LFSRとGalois LFSRの比較など、LFSRの詳細に関しては本文書内の `参考資料' 
+を参照のこと。
+
+ウェブサイトとダウンロード
+==========================
+
+ウェブサイト:
+  http://lfsr-generator.sourceforge.net/
+
+ダウンロード:
+  http://sourceforge.net/project/showfiles.php?group_id=202750
+
+SourceForge.netのプロジェクトページ:
+  http://sourceforge.net/projects/lfsr-generator/
+
+SVNによる開発版のダウンロード:
+  svn co https://lfsr-generator.svn.sourceforge.net/svnroot/lfsr-generator/trunk lfsr-generator
+
+必要なツール
+============
+
+lfsr-generator の実行には、Perl(5.005またはそれ以降) が必要である。
+
+また、lfsr-generator が生成したソースコードをコンパイルするためには、
+CコンパイラまたはC++コンパイラが必要である。
+
+インストール
+============
+
+基本的なインストール手順は次の通り。
+
+  $ ./configure
+  $ make
+  # make install  (おそらくroot権限で行う必要がある)
+
+詳細はファイル `INSTALL' を参照のこと。
+
+使い方
+======
+
+lfsr-generator コマンドの呼び出し方法は次の通り。
+
+  usage: lfsr-generator [options]
+
+  Startup:
+    -h, --help     show this help.
+    -V, --version  show the version.
+
+  LFSR options:
+    --config=STRING       set the configuration: `fibonacci' or `galois'.
+    --length=NUMBER       set the length.
+    --shift-amounts=LIST  comma-separated list of shift amounts.
+    --shift-left          set the direction of shifting to left.
+    --taps=LIST           comma-separated list of tap sequences.
+
+  Code options:
+    --function-name=STRING       set the name of the function.
+    --function-qualifier=STRING  set qualifier of the function.
+    --function-template          generate a function template. (C++ only)
+    --header                     equivalent to `--include-guard --prototype'.
+    --include-guard              generate with an include guard.
+    --includes=LIST              comma-separated list of pre-included files.
+    --language=STRING            set language: `c' or `c++'.
+    --namespace=STRING           set the namespace of the function. (C++ only)
+    --no-extern-c-guard          remove an `extern "C"' guard.
+    --prototype                  generate the prototype of the function.
+    --variable-type=STRING       set variable type used in the function.
+
+  Other options:
+    --no-auto      disable auto-correcting of settings.
+
+例えば、ビット幅を4、タップ数列を(4, 1)、シフト量を1と指定するなら:
+
+  $ lfsr-generator --length=4 --taps=4,1 --shift-amounts=1 > shift_lfsr.c
+
+などとする。生成されたソースコードは標準出力へと出力される。
+
+生成された関数を呼び出すプログラムは、例えば次のようになる:
+
+  #include <stdio.h>
+  #include "shift_lfsr.h"
+
+  int main(void)
+  {
+    const unsigned int init = 1;
+    unsigned int v = init;
+    do {
+      v = shift_lfsr(v);
+      putchar(((v & 1) == 0) ? '0' : '1');
+    } while (v != init);
+  }
+
+このプログラムは、乱数ビット列を `0' または `1' の文字からなる文字列と
+して出力する。shift_lfsr 関数は、状態変数 v の下位4ビットをLFSRの状態
+として使用する。状態変数の初期化は呼び出し側で行う: 下位4ビットに乱数
+種を、残りの上位ビットに0を与えておく。ヘッダファイル `shift_lfsr.h' 
+は、オプション `--header' を与えることで生成できる。
+
+オプション `--config=<str>' は、LFSRの設定を選択する。Fibonacci LFSRま
+たはGalois LFSRのどちらかを選択する。デフォルトはFibonacci LFSRである。
+
+Fibonacci LFSRでは、演算量を増加させずにシフト量を増やすことができる。
+例えば次の通り。
+
+  $ lfsr-generator --config=fibonacci \
+      --length=23 --taps=23,14 --shift-amounts=8
+
+上記の例では、LFSRの状態を8ビット分まとめて遷移させるコードを出力する。
+演算量はシフト量が1ビットの場合と変わらない。状態が8ビットずつ進むので、
+呼び出し側では:
+
+  while (...) {
+    v = shift_lfsr(v);
+    random_bits = (v & 0xff);
+    ...
+  }
+
+などと、状態変数の下位8ビットをそのまま乱数として使用できる。ただし、
+乱数列の周期は (2^23 - 1) / 8 に短縮されることに留意すること。一般に、
+タップ間距離の最小値までシフト量を増やすことができる。
+
+また、演算量は増加するが、タップ間距離の制約を受けずに関数内でのシフト
+回数を増やすよう指定することができる。例えば次の通り:
+
+  $ lfsr-generator --config=fibonacci \
+      --length=32 --taps=32,25,17,7 --shift-amounts=6,6,4
+
+上記の例では、1回の関数呼び出しで合計16ビットのシフトを行う。関数内で
+は、6ビットシフト・6ビットシフト・4ビットシフトの3回に分けて処理を行う。
+関数内での各シフト量はタップ間距離の制約に従う。1回の関数呼び出しに要
+する演算量はおよそ3倍になるが、処理が関数内に閉じているため、最適化に
+より処理時間は3倍にはならないことが期待できる。
+
+Galois LFSRは、タップ数によらず一定の演算量で1回のシフトを処理できる。
+例えば次の通り:
+
+  $ lfsr-generator --config=galois \
+      --length=25 --taps=25,24,23,22,21,20,19,18,9,7,6,5,4,2 \
+      --shift-amounts=1
+
+上記の例では多数のタップを与えているが、演算量は増加しない: Fibonacci 
+形式ではタップ数に比例して演算量が増加する。一方、Galois形式は
+Fibonacci形式とは違い演算量を増加させずにシフト量を増やすことはできな
+い。一般に、タップ数の多い密なLFSRを扱う場合はGalois形式を、疎なLFSR 
+で複数のビットをまとめて取り出したい場合はFibonacci形式を用いる方が実
+行時効率がよい。
+
+Galois LFSRにて関数内でのシフト回数を増やすには、例えば次のように指定
+する:
+
+  $ lfsr-generator --config=galois \
+      --length=32 --taps=32,25,17,7 --shift-amounts=16
+
+上記の例では、1回の関数呼び出しで合計16ビットのシフトを行う。関数内で
+は1ビットシフト処理を合計16回行うため、その分演算量は増大する。
+
+その他演算量の詳細は本文書内の `生成コードと演算量' を参照のこと。
+
+オプション `--shift-left' は、関数が用いるシフト演算の方向を左シフトに
+変更する。デフォルトは右シフトである。形式をFibonacci、LFSRのビット幅
+を4、タップ数列を(4, 1)、シフト量を1、状態変数のビット幅を8ビットとし
+たとき、右シフトを用いた場合の状態変数の値の遷移は次の通り。ただし、表
+記は2進数である。
+
+  00000001
+  00001000
+  00001100
+  00001110
+  00001111
+  00000111
+  00001011
+  00000101
+  ...
+
+左シフトを用いた場合の状態変数の値の遷移は次の通り。
+
+  00000001
+  00000011
+  00000111
+  00001111
+  00011110
+  00111101
+  01111010
+  11110101
+  ...
+
+どちらのシフトを用いる場合でも、状態変数の下位4ビットだけがLFSRの状態
+として使用される。一方、残りの上位ビットは、右シフトを用いる場合は常に
+0だが、左シフトを用いる場合は過去の値の履歴となる。これを利用して、1回
+の関数呼び出しごとにLFSRの状態よりも大きなビット幅の乱数を得ることがで
+きる。例えば次の通り。
+
+  $ lfsr-generator --shift-left \
+      --length=31 --taps=31,18 --shift-amounts=12,12,8
+
+上記の例では、LFSRの状態は31ビット、1回の関数呼び出しごとのシフト量は
+32ビットである。状態変数の下位32ビットを乱数として使用できる。
+
+生成コードと演算量
+==================
+
+形式をFibonacci、LFSRのビット幅を4、タップ数列を(4, 1)、シフト量を1、
+シフト方向を右としたときの生成コードの抜粋は次の通り。
+
+  unsigned int shift_lfsr(unsigned int v)
+  {
+    enum {
+      length         = 4,
+      tap_0          = 4,
+      tap_1          = 1,
+      shift_amount_0 = 1
+    };
+    typedef unsigned int T;
+    const T zero = (T)(0);
+    v = (
+      (
+        v >> shift_amount_0
+      ) | (
+        (
+          (v << (tap_0 - shift_amount_0)) ^
+          (v << (tap_1 - shift_amount_0))
+        ) & (
+          ~(~zero << shift_amount_0) << (length - shift_amount_0)
+        )
+      )
+    );
+    return v;
+  }
+
+上記コードをGccを用いてi686アーキテクチャ向けにコンパイルしたときの逆
+アセンブル結果は次の通り。
+
+  push   %ebp
+  mov    %esp,%ebp
+  mov    0x8(%ebp),%edx
+  pop    %ebp
+  lea    0x0(,%edx,8),%eax
+  xor    %edx,%eax
+  and    $0x8,%eax
+  shr    %edx
+  or     %edx,%eax
+  ret    
+
+Galois LFSRにて他の設定を同一としたときの生成コードと逆アセンブル結果
+は次の通り。
+
+  unsigned int shift_lfsr(unsigned int v)
+  {
+    enum {
+      length = 4,
+      tap_0  = 4,
+      tap_1  = 1
+    };
+    typedef unsigned int T;
+    const T zero = (T)(0);
+    const T lsb = zero + (T)(1);
+    const T feedback = (
+      (lsb << (tap_0 - 1)) ^
+      (lsb << (tap_1 - 1))
+    );
+    v = (v >> 1) ^ ((zero - (v & lsb)) & feedback);
+    return v;
+  }
+
+  push   %ebp
+  mov    %esp,%ebp
+  mov    0x8(%ebp),%edx
+  pop    %ebp
+  mov    %edx,%eax
+  and    $0x1,%eax
+  neg    %eax
+  and    $0x9,%eax
+  shr    %edx
+  xor    %edx,%eax
+  ret    
+
+一般に、Fibonacci LFSRとGalois LFSR各々における1回のシフト演算に要する
+必須演算の回数は次の通りである。
+
+  Fibonacci:
+    変数に対する定数ビットシフト x タップ数
+    変数と変数とのXOR            x (タップ数 - 1)
+    変数と定数とのAND            x 1
+    変数に対する定数ビットシフト x 1
+    変数と変数とのOR             x 1
+
+  Galois:
+    変数に対する1ビットシフト    x 1
+    変数に対する定数ビットシフト x 1 (`--shift-left' 指定時のみ)
+    変数に対する単項マイナス     x 1
+    変数と定数とのAND            x 2
+    変数と変数とのXOR            x 1
+
+例
+==
+
+8ビット幅乱数生成、周期(2^31 - 1) / 8、低演算量:
+  $ lfsr-generator --config=fibonacci \
+      --length=31 --taps=31,18 --shift-amounts=8 \
+      --variable-type='unsigned int'
+
+16ビット幅乱数生成、周期(2^31 - 1) / 16、低演算量:
+  $ lfsr-generator --config=fibonacci \
+      --length=31 --taps=31,18 --shift-amounts=8,8 \
+      --variable-type='unsigned int'
+
+32ビット幅乱数生成、周期(2^31 - 1) / 32、低演算量:
+  $ lfsr-generator --config=fibonacci --shift-left \
+      --length=31 --taps=31,18 --shift-amounts=12,12,8 \
+      --variable-type='unsigned int'
+
+8ビット幅乱数生成、周期(2^32 - 1) / 8、密なタップ数列:
+  $ lfsr-generator --config=galois \
+      --length=32 --shift-amounts=8 \
+      --taps=32,31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,4,3,2 \
+      --variable-type='unsigned int'
+
+8ビット幅乱数生成、uint32_t使用:
+  $ lfsr-generator --config=fibonacci \
+      --length=31 --taps=31,18 --shift-amounts=8 \
+      --variable-type='uint32_t' --includes='<stdint.h>'
+
+ヘッダファイル生成:
+  $ lfsr-generator --header --variable-type='unsigned int'
+
+8ビット幅乱数生成、インライン関数・関数テンプレート・namespace使用:
+  $ lfsr-generator --config=fibonacci \
+      --length=31 --taps=31,18 --shift-amounts=8 \
+      --function-qualifier='inline' --function-template --namespace='lfsr'
+
+制約
+====
+
+単一の変数に格納できない大きな内部状態を持つLFSRを扱うことはできない。
+
+最新情報
+========
+
+ファイル `NEWS' を参照のこと。
+
+著作権とライセンス
+==================
+
+Copyright (C) 2007  若林 正樹
+
+lfsr-generator はフリーソフトウェアである: GNU General Public License 
+バージョン2に基づいて頒布される。無保証である。詳細はファイル 
+`COPYING' を参照のこと。
+
+lfsr-generator によって生成されたソースコードはフリーソフトウェアであ
+る: MITライセンスに基づく。無保証である。
+
+参考資料
+========
+
+- "Applied Cryptography", Bruce Schneier(著)
+
+- 『暗号技術大全』, Bruce Schneier(著), 山形 浩生(監訳)
+
+- "Linear feedback shift register - Wikipedia"
+  http://en.wikipedia.org/wiki/Linear_feedback_shift_register

@@ -1,0 +1,59 @@
+#! @SHELL@
+#
+# This file is part of the test suite of lfsr-generator.
+# Copyright (C) 2007  Wakabayashi Masaki
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+builddir='@builddir@'
+test_engine="$builddir/test-engine"
+
+sed '/^-/s/^/--config=galois /' << __EOS__ \
+| exec $test_engine $@
+
+# sparse taps
+--length=3  --taps=3,2        --shift-amounts=1 : 2**3 - 1
+--length=4  --taps=4,3        --shift-amounts=1 : 2**4 - 1
+--length=5  --taps=5,3        --shift-amounts=1 : 2**5 - 1
+--length=5  --taps=5,4,3,2    --shift-amounts=1 : 2**5 - 1
+--length=6  --taps=6,5        --shift-amounts=1 : 2**6 - 1
+--length=7  --taps=7,6        --shift-amounts=1 : 2**7 - 1
+--length=8  --taps=8,7,6,1    --shift-amounts=1 : 2**8 - 1
+--length=12 --taps=12,11,10,4 --shift-amounts=1 : 2**12 - 1
+--length=15 --taps=15,8       --shift-amounts=1 : 2**15 - 1
+--length=16 --taps=16,13,9,6  --shift-amounts=1 : 2**16 - 1
+
+# dense taps
+--length=14 --taps=14,13,12,11,10,9,8,7,6,5,2,1       --shift-amounts=1 : 2**14 - 1
+--length=15 --taps=15,14,13,12,11,10,9,8,7,6,5,4,3,2  --shift-amounts=1 : 2**15 - 1
+--length=16 --taps=16,15,14,13,12,11,10,9,8,7,6,5,3,2 --shift-amounts=1 : 2**16 - 1
+
+# multiple shifts
+--length=3  --taps=3,2       --shift-amounts=2 : 2**3 - 1
+--length=4  --taps=4,3       --shift-amounts=2 : 2**4 - 1
+--length=4  --taps=4,3       --shift-amounts=3 : (2**4 - 1) / 3
+--length=5  --taps=5,3       --shift-amounts=2 : 2**5 - 1
+--length=16 --taps=16,13,9,6 --shift-amounts=2 : 2**16 - 1
+--length=16 --taps=16,13,9,6 --shift-amounts=4 : 2**16 - 1
+--length=16 --taps=16,13,9,6 --shift-amounts=8 : 2**16 - 1
+
+# shift-left
+--shift-left --length=12 --taps=12,11,10,4 --shift-amounts=1 : 2**12 - 1
+--shift-left --length=15 --taps=15,8       --shift-amounts=1 : 2**15 - 1
+--shift-left --length=16 --taps=16,13,9,6  --shift-amounts=1 : 2**16 - 1
+--shift-left --length=16 --taps=16,13,9,6  --shift-amounts=4 : 2**16 - 1
+--shift-left --length=16 --taps=16,13,9,6  --shift-amounts=8 : 2**16 - 1
+
+__EOS__

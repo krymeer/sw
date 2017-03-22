@@ -1,0 +1,102 @@
+#! @PERL@ -w
+
+eval 'case $# in 0) exec @PERL@ -S "$0";; *) exec @PERL@ -S "$0" "$@";; esac'
+    if 0;
+
+# This file is part of the test suite of lfsr-generator.
+# Copyright (C) 2007  Wakabayashi Masaki
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+use strict;
+use Getopt::Long;
+use IO::File;
+
+# settings by configure
+my $srcdir = '@srcdir@';
+my $builddir = '@builddir@';
+my $compile = '@CC@ @CPPFLAGS@ @CFLAGS@ @LDFLAGS@';
+
+# file locations
+my $lfsr_generator = "$builddir/lfsr-generator";
+my $test_source = "$srcdir/shift_lfsr_test.c";
+
+# generated files
+my $generated_source = 'tmp.c';
+my $generated_executable = 'tmp.out';
+
+sub do_test(@)
+{
+	foreach ($generated_source, $generated_executable) {
+		-f $_ and die "$_ already exists";
+	}
+	my $length = do {
+		my $t;
+		foreach (@_) {
+			if (/^--length=(\d+)$/) {
+				$t = $1;
+				last;
+			}
+		}
+		$t;
+	} or die 'length not specified';
+	my $cleaner = sub { unlink($generated_source, $generated_executable); };
+	local $SIG{__DIE__} = $cleaner;
+	system("$lfsr_generator " . join(' ', @_) . " > $generated_source") == 0
+		or die "$lfsr_generator failed: $?";
+	system(
+		"$compile $test_source $generated_source " .
+		"-o $generated_executable"
+	);
+	my $result = do {
+		my $fh = new IO::File("./$generated_executable -w$length |")
+			or die "$generated_executable failed: $!";
+		local $_ = do { local $/; join '', <$fh> };
+		/^(?:.*?:)?\s*(\d+)\s*$/s ? $1 : '';
+	};
+	$cleaner->();
+	$result;
+}
+
+# main
+{
+	my $verbose = '';
+	GetOptions('verbose|v!' => \$verbose) or exit(1);
+	my $total = 0;
+	my $ok = 0;
+	while (<>) {
+		chomp;
+		s/#.*$//;
+		s/^\s+//;
+		s/\s+$//;
+		next if (/^$/);
+		/^([^:].*?)\s*:\s*([^:].*?)$/ or die "invalid input";
+		my @args = split(/\s+/, $1);
+		my $expected = eval $2; die $@ if ($@);
+		print '"', join(' ', @args), '" ->' if ($verbose);
+		my $result = do_test(@args);
+		if ($verbose) {
+			print
+				" result:", $result ne '' ? $result : q|''|,
+				" expected:$expected, ",
+				($result eq $expected ? 'ok' : 'failed'),
+				"\n";
+		}
+		$ok++ if ($result eq $expected);
+		$total++;
+	}
+	print "total:$total ok:$ok\n" if ($verbose);
+	exit($ok == $total ? 0 : 1);
+}

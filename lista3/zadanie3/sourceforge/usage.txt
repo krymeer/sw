@@ -1,0 +1,1 @@
+lfsr-generator --length=16 --taps=15,14,13,4 --shift-amounts=1 --shift-left > shift.c

@@ -1,0 +1,16 @@
+lfsr-generator NEWS -- history of user-visible changes.
+
+New in 1.0.2:
+* shift-left support.
+* C++ support.
+* Function template support.
+* Namespace support.
+* Function qualifier support.
+* New options: `--include-guard', `--includes', `--no-extern-c-guard',
+  `--prototype' and `--no-auto'.
+
+New in 1.0.1:
+* New option `--header'.  `--target=...' is obsoleted.
+
+New in 1.0.0:
+* Initial release.
