@@ -22,7 +22,7 @@ state_advance: process(clk, reset)
 begin
   if reset = '1' then
     stan_teraz <= S0;
-  elsif reset = '0' and rising_edge(clk) then
+  elsif rising_edge(clk) then
     if pusher = '1' then
       stan_teraz <= stan_potem;
     end if;

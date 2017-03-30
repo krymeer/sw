@@ -47,12 +47,12 @@ begin
     wait for clk_period*10;
 
     p <= '1';
+    wait for 10*clk_period;
 
-    for i in 1 to 4 loop
+    for i in 1 to 10 loop
       print(str(r));
-      wait for clk_period;
+      wait for clk_period/2;
     end loop;
-
     wait;
   end process;
 end;
