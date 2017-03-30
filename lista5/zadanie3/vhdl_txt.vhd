@@ -12,6 +12,9 @@ package txt_util is
     -- prints a message to the screen
     procedure print(text: string);
 
+    procedure str_write(file out_file: TEXT; 
+                    new_string: in  string);
+
     -- prints the message when active
     -- useful for debug switches
     procedure print(active: boolean; text: string);
