@@ -1,4 +1,8 @@
 makefile
+src/*
+*.cf
+*.vcd
+*.o
 *.pdf
 *.zip
 *.jpg
