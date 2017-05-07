@@ -7,6 +7,20 @@ entity hamming_tb is
 end hamming_tb;
 
 architecture behavior of hamming_tb is
+
+  -- function that returns a line (to write) containing a std_logic_vector
+  function std_logic_vector_to_line(v: in std_logic_vector) return line is
+    variable b: string(1 to 3);
+    variable l: line;
+    variable len: natural;
+  begin
+    len := v'length-1;
+    for i in len downto 0 loop
+      b := std_logic'image(v(i));
+      write(l, b(2));
+    end loop;
+    return l;
+  end std_logic_vector_to_line;
   
   -- encoder: takes a binary number and extends its width (from 4 to 7 bits)
   component hamming_encoder is
@@ -51,45 +65,39 @@ begin
   );
 
   main_proc: process
-    variable l: line;
+    variable line_w: line;
     variable b: string(1 to 3);
   begin
 
-  write(l, String'(""));
-  writeline(output, l);
+  write(line_w, String'(""));
+  writeline(output, line_w);
 
   -- encoding and decoding all the binary numbers that consist of at most 4 bits
   for k in 0 to 15 loop
     data_in <= std_logic_vector(to_unsigned(k, data_in'length));
     wait for period;
 
-    for i in 3 downto 0 loop
-      b := std_logic'image(data_in(i));
-      write(l, b(2));
-    end loop;
-    write(l, String'(" - "));
-    for i in 6 downto 0 loop
-      b := std_logic'image(connector(i));
-      write(l, b(2));
-    end loop;
-    writeline(output, l);
+    write(line_w, 
+      std_logic_vector_to_line(data_in).all 
+      & String'(" - ") 
+      & std_logic_vector_to_line(connector).all
+    );
+    writeline(output, line_w);
+
     wait for period;
 
-    for i in 6 downto 0 loop
-      b := std_logic'image(connector(i));
-      write(l, b(2));
-    end loop;
-    write(l, String'(" - "));
-    for i in 3 downto 0 loop
-      b := std_logic'image(data_out(i));
-      write(l, b(2));
-    end loop;
-    writeline(output, l);
+    write(line_w, 
+      std_logic_vector_to_line(connector).all 
+      & String'(" - ") 
+      & std_logic_vector_to_line(data_out).all
+    );
+    writeline(output, line_w);
+
     wait for period;
   end loop;
 
-  write(l, String'(""));
-  writeline(output, l);
+  write(line_w, String'(""));
+  writeline(output, line_w);
   wait;
   end process;
 
