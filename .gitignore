@@ -1,5 +1,7 @@
 makefile
 src/*
+*.aux
+*.log
 *.cf
 *.vcd
 *.o
