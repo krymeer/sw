@@ -54,6 +54,22 @@
   \maketitle\thispagestyle{empty}
   \onehalfspacing
 
+  \section{Opis układu}
+  Na architekturę układu opisanego w pliku {\lineCode main\_tb.vhd} składają się cztery komponenty połączone tak, jak przedstawiono to na poniższym rysunku:
+  \begin{figure}[H]\centering
+    \includegraphics[width=1.2\textwidth,center]{circuit.png}
+    \caption{uproszczony schemat układu komponentów}
+  \end{figure}
+
+  \begin{enumerate}
+    \item \textbf{Koder kodu Hamminga} -- przyjmuje ciągi znaków składające się z \textbf{czterech} bitów, które za pomocą określonych reguł zamienia na \textbf{siedmiocyfrowe} liczby w systemie binarnym;
+    \item \textbf{Kanał stratny} -- przekazuje dalej siedmiobitowe liczby, które zostały mu dostarczone na wejście, przy czym od czasu do czasu zmienia od \textbf{1} do \textbf{2} bitów danego argumentu, czyli dokonuje \textbf{przekłamania} na bitach;
+    \item \textbf{,,Sprawdzacz''} analizuje dane zwrócone przez kanał stratny i sprawdza ich poprawność pod względem kodowania Hamminga -- może wykryć \textbf{jedno} przekłamanie bitu;
+    \item \textbf{Dekoder kodu Hamminga} -- dokonuje \textbf{translacji} liczby zakodowanej kodem Hamminga do jej \textbf{oryginalnej} postaci.
+  \end{enumerate}
+
+
+
   \section{Implementacja}
   Zdefiniujmy macierze
   \begin{gather*}
@@ -111,7 +127,7 @@
       c_0 \\
     \end{pmatrix}
   \end{gather*}
-  Jeśli nie doszło do przekłamania, powinniśmy otrzymać liczbę wejściową; należy tu uwzględnić wektor zwracany przez ,,sprawdzacz'' kodera (omówiony w punkcie \textbf{1.2}) i zamienić, jeśli jest to wskazane, któryś z bitów.
+  Jeśli nie doszło do przekłamania, powinniśmy otrzymać liczbę wejściową; należy tu uwzględnić wektor zwracany przez ,,sprawdzacz'' kodera (omówiony w punkcie \textbf{2.2}) i zamienić, jeśli jest to wskazane, któryś z bitów.
 
   \section{Testy}
   \subsection{Liczba wykrytych błędów}
@@ -156,17 +172,17 @@
   \subsection{Przebiegi sygnałów}
   \begin{figure}[H]
     \includegraphics[width=1.2\textwidth,center]{gtk1.png}
-    \caption{Liczby na wejściu i wyjściu kodera kodu Hamminga}
+    \caption{liczby na wejściu i wyjściu kodera kodu Hamminga}
   \end{figure}
   W zapisie liczb 11, 12 i 13 w kodzie Hamminga zostały wykryte przekłamania, które dekoder próbował wyeliminować -- sygnał wyjściowy zmieniał się częściej niż zwykle. Dla 11 zmiana wartości nie była konieczna (zniekształcony bit był fragmentem kodu Hamminga).
   \begin{figure}[H]
     \includegraphics[width=1.2\textwidth,center]{gtk2.png}
-    \caption{Liczby na wejściu i wyjściu kanału stratnego}
+    \caption{liczby na wejściu i wyjściu kanału stratnego}
   \end{figure}
   Zakodowane postaci liczb 11, 12 i 13 uległy uszkodzeniu podczas transmisji za pośrednictwem kanału stratnego -- ich losowe bity zostały zamienione, co oczywiście skutkowało zmianą wartości na wyjściu.
   \begin{figure}[H]
     \includegraphics[width=1.2\textwidth,center]{gtk3.png}
-    \caption{Zestawienie kodera i dekodera kodu Hamminga z kanałem stratnym}
+    \caption{zestawienie kodera i dekodera kodu Hamminga z kanałem stratnym}
   \end{figure}
   Pełny ,,cykl'': liczba na wejściu kodera kodu Hamminga $\rightarrow$ liczba na wejściu kanału stratnego $\rightarrow$ liczba na wyjściu kanału stratnego $\rightarrow$ liczba na wyjściu dekodera kodu Hamminga. Zmiany sygnałów wejściowych następują, gdy sygnał zegara zmienia się na \textit{'0'}, wyjściowych zaś -- kiedy wzrasta do \textit{'1'}.
 
