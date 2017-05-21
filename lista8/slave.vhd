@@ -19,6 +19,11 @@ use ieee.numeric_std.all;
 -- executed and input buffer register is given in outputs, vstate, 
 -- vcurrent_cmd and vq, respectively
 -----------------------------------------------------------------------
+-- features added or improved by the student:
+--  * ADD [0001] - adding numbers
+--  * SUB [0101] - subtracting numbers
+--  * CRC [0011] - computing the CRC
+--  * printing bus' data when needed (with std.textio)
 
 entity slave is
   generic(identifier: std_logic_vector(7 downto 0) := "10101010");
