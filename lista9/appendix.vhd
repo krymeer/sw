@@ -6,6 +6,7 @@ use std.textio.all;
 
 package appendix is
   function std_logic_vector_to_line(v: in std_logic_vector) return line;
+  function string_to_std_logic_vector(s: in string) return std_logic_vector;
   procedure new_line;
   procedure write_v(v: in std_logic_vector);
   procedure write_s(s: in string);
@@ -25,6 +26,21 @@ package body appendix is
     end loop;
     return l;
   end std_logic_vector_to_line;
+
+  -- function that returns a std_logic_vector built from the given string
+  function string_to_std_logic_vector(s: in string) return std_logic_vector is
+    variable out_v: std_logic_vector(8 downto 0) := (others => '0');
+    variable i: integer := 1;
+  begin
+    for k in 8 downto 0 loop
+      case s(i) is
+        when '0' => out_v(k) := '0';
+        when others => out_v(k) := '1';
+      end case;
+      i := i + 1;
+    end loop;
+    return out_v;
+  end string_to_std_logic_vector;
 
   -- procedure that simply prints a new line
   procedure new_line is
@@ -51,4 +67,5 @@ package body appendix is
     write(line_w, s);
     writeline(output, line_w);
   end write_s;
+
 end appendix;
