@@ -1,4 +1,4 @@
--- © 2017 Krzysztof R. Osada
+-- Author: Krzysztof R. Osada, 2017
 
 library ieee;
 use ieee.std_logic_1164.all;

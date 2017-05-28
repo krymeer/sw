@@ -1,6 +1,9 @@
+-- Author: Krzysztof R. Osada, 2017
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use work.appendix.all;
 
 entity ram_tb is
 end ram_tb;
@@ -55,12 +58,18 @@ begin
   test: process
   begin
     wait for 100 ns;
-    
+
     to_write <= '1';
     address <= "00001";
     data_in <= "000100010";
 
     wait for clk_period;
+
+    new_line;
+    write_s("address:");
+    write_v(address);
+    write_s("data_in:");
+    write_v(data_in);
 
     to_write <= '1';
     address <= "00010";
@@ -78,6 +87,19 @@ begin
     address <= "00001";
     data_in <= "000000000";
 
+    wait for clk_period;
+
+    new_line;
+    write_s("...a few moments later...");
+    new_line;
+
+    write_s("address:");
+    write_v(address);
+    write_s("data_out:");
+    write_v(data_out);
+
+    new_line;
+    
     wait;
 
   end process;
