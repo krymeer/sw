@@ -3,13 +3,14 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use std.textio.all;
 use work.appendix.all;
 
 entity ram_old_tb is
 end ram_old_tb;
 
 architecture behaviour of ram_old_tb is
-  component ram is
+  component ram_2805 is
   port(
     clk: in std_logic;
     to_write: in std_logic;
@@ -34,7 +35,7 @@ architecture behaviour of ram_old_tb is
 begin
 
   -- Instatiating the UUT
-  uut: ram
+  uut: ram_2805
   port map(
     clk => clk,
     to_write => to_write,
@@ -52,54 +53,45 @@ begin
     wait for clk_period/2;
   end process;
 
-  -- Testing the RAM entity. First of all, a few words are stored at
-  -- the given addresses, then one of them is loaded from the RAM
-  -- and finally displayed on the output
-  test: process
+  -- Testing the RAM entity...
+  read_file: process
+    variable line_r: line;
+    variable ctr: integer := 0;
+    variable data_v: std_logic_vector(8 downto 0);
+    variable data_s: string(1 to 9);
+    file marie_file: text;
   begin
     wait for 100 ns;
 
-    to_write <= '1';
-    address <= "00001";
-    data_in <= "000100010";
+    file_open(marie_file, "marie_input.txt", read_mode);
+    while not endfile(marie_file) loop
+      readline(marie_file, line_r);
+      read(line_r, data_s);
+      data_v := string_to_std_logic_vector(data_s);
 
-    wait for clk_period;
+      to_write <= '1';
+      address <= std_logic_vector(to_unsigned(ctr, address'length));
+      data_in <= data_v;
 
-    new_line;
-    write_s("address:");
-    write_v(address);
-    write_s("data_in:");
-    write_v(data_in);
+      wait for clk_period;
 
-    to_write <= '1';
-    address <= "00010";
-    data_in <= "000100001";
-
-    wait for clk_period;
-
-    to_write <= '1';
-    address <= "00011";
-    data_in <= "000100000";
-
-    wait for clk_period;
+      ctr := ctr+1;
+    end loop;
 
     to_write <= '0';
-    address <= "00001";
-    data_in <= "000000000";
-
+    data_in <= (others => '0');
     wait for clk_period;
 
     new_line;
-    write_s("...a few moments later...");
+    write_s("Displaying the content of the RAM entity:");
+    new_line;
+    for i in 0 to ctr-1 loop
+      address <= std_logic_vector(to_unsigned(i, address'length));
+      wait for clk_period;
+      write_v(data_out);
+    end loop;
     new_line;
 
-    write_s("address:");
-    write_v(address);
-    write_s("data_out:");
-    write_v(data_out);
-
-    new_line;
-    
     wait;
 
   end process;

@@ -11,23 +11,17 @@ end ram_tb;
 
 architecture behaviour of ram_tb is
   component ram is
-  port(
-    clk: in std_logic;
-    to_write: in std_logic;
-    address: in std_logic_vector(4 downto 0);
-    data_in: in std_logic_vector(8 downto 0);
-    data_out: out std_logic_vector(8 downto 0)
+  port (
+    conn_bus: inout std_logic_vector(8 downto 0);
+    clk: in std_logic
   );
   end component;
 
-  -- inputs
-  signal clk: std_logic := '0';
-  signal to_write: std_logic := '0';
-  signal address: std_logic_vector(4 downto 0) := (others => '0');
-  signal data_in: std_logic_vector(8 downto 0) := (others => '0');
+  -- inout bus
+  signal conn_bus: std_logic_vector(8 downto 0) := (others => 'Z');
 
-  -- output
-  signal data_out: std_logic_vector(8 downto 0);
+  -- input clock
+  signal clk: std_logic := '0';
 
   -- clock period definition 
   constant clk_period: time := 10 ns;
@@ -37,11 +31,8 @@ begin
   -- Instatiating the UUT
   uut: ram
   port map(
-    clk => clk,
-    to_write => to_write,
-    address => address,
-    data_in => data_in,
-    data_out => data_out
+    conn_bus => conn_bus,
+    clk => clk
   );
 
   -- clock process definition
@@ -63,32 +54,42 @@ begin
   begin
     wait for 100 ns;
 
+    -- Reading contents of a given file
     file_open(marie_file, "marie_input.txt", read_mode);
     while not endfile(marie_file) loop
       readline(marie_file, line_r);
       read(line_r, data_s);
+      -- Converting a string to a std_logic_vector
       data_v := string_to_std_logic_vector(data_s);
 
-      to_write <= '1';
-      address <= std_logic_vector(to_unsigned(ctr, address'length));
-      data_in <= data_v;
-
+      -- Storing a value at an address in the memory
+      conn_bus <= "111100001";
+      wait for clk_period;
+      conn_bus <= std_logic_vector(to_unsigned(ctr, conn_bus'length));
+      wait for clk_period;
+      conn_bus <= data_v;
       wait for clk_period;
 
       ctr := ctr+1;
     end loop;
 
-    to_write <= '0';
-    data_in <= (others => '0');
     wait for clk_period;
 
     new_line;
-    write_s("Displaying the content of the RAM entity:");
+    write_s("Displaying contents of the RAM entity:");
     new_line;
     for i in 0 to ctr-1 loop
-      address <= std_logic_vector(to_unsigned(i, address'length));
+      -- Reading a value stored at a given address in the memory
+      conn_bus <= "111100000";
       wait for clk_period;
-      write_v(data_out);
+      conn_bus <= std_logic_vector(to_unsigned(i, conn_bus'length));
+      wait for clk_period;
+      -- Enabling the RAM entity to write on the bus
+      conn_bus <= (others => 'Z');
+      wait for clk_period;
+      write_v(conn_bus);
+      wait for clk_period;
+      
     end loop;
     new_line;
 
