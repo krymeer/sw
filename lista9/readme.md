@@ -33,8 +33,18 @@ Each element is connected with a special "address" (which is, frankly speaking, 
 | 111100001 | RAM | storing data in the memory |
 | 111100010 | PC | jumping to a specified address of an instruction |
 | 111100011 | PC | skipping one of instructions |
+| 111100100 | REG | updating the MAR (*memory address register*) |
+| 111100101 | REG | getting the MAR value
+| 111100110 | REG | updating the MBR (*membory buffer register*) |
+| 111100111 | REG | getting the MBR value |
+| 111101000 | REG | updating the accumulator (AC) |
+| 111101001 | REG | getting the value of the accumulator |
+| 111101010 | REG | updating the InREG value |
+| 111101011 | REG | getting the InREG value |
+| 111101100 | REG | updating the OutREG value |
 
-Each entity call begins with ``1111`` so as to distinguish it from MARIE instructions and binary values. 
+Each entity call begins with ``1111`` so as to distinguish it from MARIE instructions and binary values.
+**Note**: only first **four** codes are implemented so far.
 
 #####  RAM (reading)
 Required syntax:
