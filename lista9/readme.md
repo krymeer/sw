@@ -48,7 +48,7 @@ Four oldest bits should be equal to zero.
 ##### RAM (storing)
 Required syntax
 ```
-111100000
+111100001
 0000XXXXX
 YYYYYYYYY
 ```
