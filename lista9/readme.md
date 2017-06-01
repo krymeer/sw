@@ -44,7 +44,7 @@ Each element is connected with a special "address" (which is, frankly speaking, 
 | 111101100 | REG | updating the OutREG value |
 
 Each entity call begins with ``1111`` so as to distinguish it from MARIE instructions and binary values.
-~~**Note**: only first **four** codes are implemented so far.~~ ~Everything should work like a charm.~
+~~**Note**: only first **four** codes are implemented so far.~~ Everything should work like a charm.
 
 #####  RAM (reading)
 Required syntax:
