@@ -60,10 +60,10 @@ Required syntax
 ```
 111100001
 0000XXXXX
-YYYYYYYYY
+0000YYYYY
 ```
 where ``XXXXX`` - an address at the memory - is a binary value from 0 to 31.
-Last but not least, ``YYYYYYYYY`` is a value which will be stored in the RAM entity.
+Last but not least, ``YYYYY`` is a value which will be stored in the RAM entity. **Note** that this number *cannot* be greater than 31 because it could be confused with operations (words starting with `0001`, `0010`,.., `1001`) or system entities' codes (words starting with `1111`).
 
 ##### PC (jumping)
 Required syntax:
@@ -81,3 +81,69 @@ Required syntax:
 ```
 Skipping one address defined at the RAM entity, more precisely: a value of the PC register.
 It could be useful when there is a need to omit one of the program instructions.
+
+##### MAR (updating)
+Required syntax:
+```
+111100100
+0000XXXXX
+```
+Storing the address `XXXXX` in the *memory address register*.
+
+##### MAR (getting)
+Required syntax:
+```
+111100101
+```
+Getting the address stored in the *memory address register*.
+
+##### MBR (updating)
+Required syntax:
+```
+111100110
+0000XXXXX
+```
+Storing the value `XXXXX` in the *memory buffer register*.
+
+##### MBR (getting)
+Required syntax:
+```
+111100111
+```
+Getting the value stored in the *memory buffer register*.
+
+##### AC (updating)
+Required syntax:
+```
+111101000
+0000XXXXX
+```
+Storing the value `XXXXX` in the accumulator.
+
+##### AC (getting)
+Required syntax:
+```
+111101001
+```
+Getting the value of the accumulator.
+##### inREG (updating)
+Required syntax:
+```
+111101010
+```
+If the number entered by the user is valid (a natural number from 0 to 31), it is stored in the inREG.
+
+##### inREG (getting)
+Required syntax:
+```
+111101011
+```
+Getting the value entered by the user.
+
+##### outREG
+Required syntax:
+```
+111101100
+0000XXXXX
+```
+Storing the value `XXXXX` in the outREG, which will be printed then on the standard output.
