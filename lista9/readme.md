@@ -158,7 +158,7 @@ When the file reading is done, the most important entity in the system -- the co
     * if it is **halt**, stop reading;
     * otherwise execute a given intruction and go to 1.
 
-So far I dealt with conflicts on the bus (which were, frankly speaking, very frustrating).
+~~So far I dealt with conflicts on the bus (which were, frankly speaking, very frustrating).~~ Moving forward...
 
 #### MARIE’s Instruction Set
 Currently implemented, supported and widely checked instructions:
