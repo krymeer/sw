@@ -10,6 +10,7 @@ entity controller_tb is
 end controller_tb;
 
 architecture behaviour of controller_tb is
+  -- RAM, a memory entity of the system
   component ram is
   port (
     conn_bus: inout std_logic_vector(8 downto 0);
@@ -17,6 +18,8 @@ architecture behaviour of controller_tb is
   );
   end component;
 
+  -- controller: the most important entity
+  -- Reads MARIE programs and performs most of system actions
   component controller is
   port(
     clk: in std_logic;
@@ -26,6 +29,8 @@ architecture behaviour of controller_tb is
   );
   end component;
 
+  -- PC: program counter
+  -- Returns an address of the instruction to be executed
   component pc is
   port (
     ctrl_pulse: in std_logic;
@@ -36,7 +41,7 @@ architecture behaviour of controller_tb is
   -- inout bus
   signal conn_bus: std_logic_vector(8 downto 0) := (others => 'Z');
 
-  -- inputs
+  -- inputs: "booleans" and a clock
   signal reading_done, clk, ctrl_pulse: std_logic := '0';
 
   -- clock period definition 
@@ -74,7 +79,7 @@ begin
     wait for clk_period/2;
   end process;
 
-  -- Testing the RAM entity...
+  -- Processing a file written in MARIE
   read_file: process
     variable line_r: line;
     variable ctr: integer := 0;
@@ -106,6 +111,8 @@ begin
     conn_bus <= (others => 'Z');
     wait for clk_period;
 
+    -- Reading process finished
+    -- The controller may now read the system memory
     reading_done <= '1';
 
     wait;
