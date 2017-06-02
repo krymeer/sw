@@ -5,7 +5,7 @@ Author: Krzysztof Osada, 2017
 **Note**: this is my own version of the final task for the Embedded Systems course. Please be advised that the code was posted here only for security purposes, so if you cannot help stealing my bloody work, do it wisely and do not get me into *your* trouble.
 
 
-##### An example of the MARIE program 
+#### An example of the MARIE program 
 A simple file which consists of 7 lines (numbered from 0 to 6).
 ```  
 #0 Load 4 
@@ -24,7 +24,7 @@ A simple file which consists of 7 lines (numbered from 0 to 6).
     000000000
 ```
 
-##### System entities
+#### System entities
 Each element is connected with a special "address" (which is, frankly speaking, just a binary number) that helps identify a component without a doubt.
 
 | Word | Entity | Further details | 
@@ -147,3 +147,15 @@ Required syntax:
 0000XXXXX
 ```
 Storing the value `XXXXX` in the outREG, which will be printed then on the standard output.
+
+#### The controller
+When reading a file is done, the most important entity in the system -- the controller -- has to deal with instructions stored in the RAM. To be more precise, it goes like this:
+1. Call the PC so as to get a currently pointed address;
+2. Start a transmission with the RAM;
+3. Send the RAM an address of the word that you want to get;
+4. Wait for a response;
+5. Decode an operation: 
+    * if it is **halt**, stop reading;
+    * otherwise execute a given intruction and go to 1.
+
+So far I dealt with conflicts on the bus (which were, frankly speaking, very frustrating).
