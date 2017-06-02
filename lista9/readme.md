@@ -151,7 +151,7 @@ Storing the value `XXXXX` in the outREG, which will be printed then on the stand
 #### The controller
 When the file reading is done, the most important entity in the system -- the controller -- has to deal with instructions stored in the RAM. To be more precise, it goes like this:
 1. Call the PC so as to get a currently pointed address;
-2. Start a transmission with the RAM;
+2. Start calling the RAM;
 3. Send the RAM an address of the word that you want to get;
 4. Wait for a response;
 5. Decode an operation: 
