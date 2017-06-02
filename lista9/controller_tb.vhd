@@ -38,6 +38,13 @@ architecture behaviour of controller_tb is
   );
   end component;
 
+  component reg is
+  port (
+    conn_bus: inout std_logic_vector(8 downto 0);
+    clk: in std_logic
+  );
+  end component;
+
   -- inout bus
   signal conn_bus: std_logic_vector(8 downto 0) := (others => 'Z');
 
@@ -59,6 +66,12 @@ begin
   pc_entity: pc
   port map(
     ctrl_pulse => ctrl_pulse,
+    conn_bus => conn_bus
+  );
+  
+  reg_entity: reg
+  port map(
+    clk => clk,
     conn_bus => conn_bus
   );
 
