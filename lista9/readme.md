@@ -159,3 +159,11 @@ When the file reading is done, the most important entity in the system -- the co
     * otherwise execute a given intruction and go to 1.
 
 So far I dealt with conflicts on the bus (which were, frankly speaking, very frustrating).
+
+#### MARIE’s Instruction Set
+Currently implemented, supported and widely checked instructions:
+
+| Word | Instruction | Further details | 
+| --------|---------|-------|
+| 011000000 | Output | printing the value of the accumulator |
+| 011100000 | Halt | terminating the program |
