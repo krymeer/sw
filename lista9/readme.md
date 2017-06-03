@@ -170,4 +170,4 @@ Currently implemented, supported and widely checked instructions:
 | 011000000 | Output | printing the value of the accumulator |
 | 011100000 | Halt | terminating the program |
 | 1000ZZ000 | Skipcond | skipping next instruction on condition ``ZZ`` |
-| 1001AAAAA | Jump | Change the value of PC to ``AAAAA`` |
+| 1001AAAAA | Jump | changing the value of PC to ``AAAAA`` |
