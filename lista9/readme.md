@@ -43,8 +43,7 @@ Each element is connected with a special "address" (which is, frankly speaking, 
 | 111101011 | REG | getting the InREG value |
 | 111101100 | REG | updating the OutREG value |
 
-Each entity call begins with ``1111`` so as to distinguish it from MARIE instructions and binary values.
-~~**Note**: only first **four** codes are implemented so far.~~ Everything should work like a charm.
+Most of actions must be performed in a special way:
 
 #####  RAM (reading)
 Required syntax:
@@ -158,7 +157,7 @@ When the file reading is done, the most important entity in the system -- the co
     * if it is **halt**, stop reading;
     * otherwise execute a given intruction and go to 1.
 
-~~So far I dealt with conflicts on the bus (which were, frankly speaking, very frustrating).~~ Moving forward...
+The most important thing here is the **communication between entities**. In order to update a register, the controller has to send a few values on the bus: an id of the entity and from time to time a value, an address or both of them. There are some operations listed below that can be performed in my implementation of the MARIE processing unit. 
 
 #### MARIE’s Instruction Set
 Currently implemented, supported and widely checked instructions:
