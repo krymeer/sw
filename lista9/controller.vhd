@@ -17,7 +17,7 @@ end controller;
 architecture arch of controller is
   -- Possible states of the controller
   -- THe list includes a few "dirty" workarounds, unfortunalely
-  type state_type is (IDLE, CALL_PC, CALL_RAM, SET_RAM_ADDR, SET_AC, GET_RAM_WORD, SET_INREG, GET_INREG, SET_OUTREG, OUTPUT_GET_AC, DECODE, PC_JUMP, WAIT_FOR_PC, SKIP_GET_AC, SKIP, PC_CLR);
+  type state_type is (IDLE, CALL_PC, CALL_RAM, SET_RAM_ADDR, SET_MAR, SET_MBR, SET_AC, GET_RAM_WORD, SET_INREG, GET_INREG, SET_OUTREG, OUTPUT_GET_AC, DECODE, PC_JUMP, WAIT_FOR_PC, SKIP_GET_AC, SKIP, PC_CLR, CALL_RAM_FOR_MBR);
 
   -- Initial state of the entity
   signal current_state, next_state: state_type := IDLE;
@@ -25,11 +25,13 @@ architecture arch of controller is
   -- "Booleans" allowing or forbidding the entity to perform an action 
   signal end_of_program, sending: std_logic := '0';
 
-  -- An address at the memory (RAM)
+  -- An address at the memory (RAM), a value of the register, an accumulator value
   signal address, value, acc: std_logic_vector(8 downto 0);
 
+  -- An adddress at the memory (being a part of the instruction)
   signal ram_addr: std_logic_vector(4 downto 0);
 
+  -- A value used with the skipcond instruction
   signal twobit: std_logic_vector(1 downto 0);
 
   -- Bus words: the first one which arrives, and the second one that could be returned
@@ -73,7 +75,7 @@ begin
         when SET_RAM_ADDR =>
           ctrl_reg <= address;
           next_state <= GET_RAM_WORD;
-        -- Wait until a word from the RAM arrives
+        -- Wait until a word from the RAM entity arrives
         when GET_RAM_WORD =>
           sending <= '0';
           if conn_bus /= address then
@@ -85,22 +87,37 @@ begin
           opcode := conn_bus(8 downto 5);
           -- Perform an operation depending on the opcode
           case opcode is
+            -- Load
+            when "0001" =>
+              unsgn := (others => '0');
+              for i in 4 downto 0 loop
+                unsgn(i) := conn_bus(i);
+              end loop;
+              address <= std_logic_vector(unsgn);
+              ctrl_reg <= "111100100";
+              sending <= '1';
+              next_state <= SET_MAR;
+            -- Input
             when "0101" =>
               ctrl_reg <= "111101010";
               sending <= '1';
               next_state <= SET_INREG;
+            -- Output
             when "0110" =>
               ctrl_reg <= "111101001";
               sending <= '1';
               next_state <= OUTPUT_GET_AC;
+            -- Halt
             when "0111" =>
               end_of_program <= '1';
               next_state <= IDLE;
+            -- Skipcond
             when "1000" =>
               ctrl_reg <= "111101001";
               sending <= '1';
               twobit <= conn_bus(4 downto 3);
               next_state <= SKIP_GET_AC;
+            -- Jump
             when "1001" =>
               sending <= '1';
               ctrl_reg <= "111100010";
@@ -109,6 +126,42 @@ begin
             when others =>
               next_state <= IDLE;
           end case;
+        -- Updating the address stored in MAR
+        when SET_MAR =>
+          if conn_bus = "111100100" then
+            ctrl_reg <= address;
+          elsif conn_bus = address then
+            sending <= '0';
+          else
+            sending <= '1';
+            ctrl_reg <= "111100000";
+            next_state <= CALL_RAM_FOR_MBR;
+          end if;
+        -- Calling the RAM entity so as to get a value
+        when CALL_RAM_FOR_MBR =>
+          if conn_bus = "111100000" then
+            ctrl_reg <= address;
+          elsif conn_bus = address then
+            sending <= '0';
+          elsif conn_bus /= "ZZZZZZZZZ" then
+            sending <= '1';
+            value <= conn_bus;
+            ctrl_reg <= "111100110";
+            next_state <= SET_MBR;
+          end if;
+        -- Updating the value stored in MBR
+        when SET_MBR =>
+          if conn_bus = "111100110" then
+            ctrl_reg <= value;
+          elsif conn_bus = value then
+            sending <= '0';
+          else
+            sending <= '1';
+            acc <= value;
+            ctrl_reg <= "111101000";
+            -- Update the accumulator
+            next_state <= SET_AC;
+          end if;
         -- When the value of the accumulator comes, call the outREG
         when OUTPUT_GET_AC =>
           sending <= '0';
