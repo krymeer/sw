@@ -42,6 +42,9 @@ Each element is connected with a special "address" (which is, frankly speaking, 
 | 111101010 | REG | updating the InREG value |
 | 111101011 | REG | getting the InREG value |
 | 111101100 | REG | updating the OutREG value |
+| 111101101 | ALU | using the ALU entity for the addition |
+| 111101110 | ALU | using the ALU entity for the subtraction |
+
 
 Most of actions must be performed in a proper order:
 
@@ -146,6 +149,24 @@ Required syntax:
 0000XXXXX
 ```
 Storing the value `XXXXX` in the outREG, which will be printed then on the standard output.
+
+##### ALU (addition)
+Required syntax:
+```
+111101101
+0000NNNNN
+0000MMMMM
+```
+Computing a sum of numbers ``NNNNN`` and ``MMMMM`` -- the result will be send on the bus.
+
+##### ALU (subtraction)
+Required syntax:
+```
+111101110
+0000NNNNN
+0000MMMMM
+```
+Computing a difference between numbers ``NNNNN`` and ``MMMMM`` -- the result will be send on the bus.
 
 #### The controller
 When the file reading is done, the most important entity in the system -- the controller -- has to deal with instructions stored in the RAM. To be more precise, it goes like this:
