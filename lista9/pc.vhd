@@ -38,8 +38,9 @@ begin
       -- Change the value [here: address] of the PC register 
         pc_reg <= unsigned(conn_bus);
         to_jump <= '0';
-      else
+      elsif conn_bus = "ZZZZZZZZZ" then
       -- If a request from the controller comes, start a transmission
+      -- Note the transmission starts only if the bus is empty
         conn_bus <= std_logic_vector(pc_reg);
         pc_reg <= pc_reg + 1;
       end if;
