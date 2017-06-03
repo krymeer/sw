@@ -17,7 +17,7 @@ end controller;
 architecture arch of controller is
   -- Possible states of the controller
   -- THe list includes a few "dirty" workarounds, unfortunalely
-  type state_type is (IDLE, CALL_PC, CALL_RAM, SET_RAM_ADDR, GET_RAM_WORD, SET_OUTREG, OUTPUT_GET_AC, DECODE);
+  type state_type is (IDLE, CALL_PC, CALL_RAM, SET_RAM_ADDR, SET_AC, GET_RAM_WORD, SET_INREG, GET_INREG, SET_OUTREG, OUTPUT_GET_AC, DECODE, PC_JUMP, WAIT_FOR_PC);
 
   -- Initial state of the entity
   signal current_state, next_state: state_type := IDLE;
@@ -26,7 +26,9 @@ architecture arch of controller is
   signal end_of_program, sending: std_logic := '0';
 
   -- An address at the memory (RAM)
-  signal address, value: std_logic_vector(8 downto 0);
+  signal address, value, acc: std_logic_vector(8 downto 0);
+
+  signal ram_addr: std_logic_vector(4 downto 0);
 
   -- Bus words: the first one which arrives, and the second one that could be returned
   signal word, ctrl_reg: std_logic_vector(8 downto 0) := (others => '0');
@@ -45,6 +47,7 @@ begin
 
   nextstate: process(current_state, word)
     variable opcode: std_logic_vector(3 downto 0);
+    variable unsgn: unsigned(8 downto 0);
   begin
     if reading_done = '1' then
       case current_state is
@@ -76,10 +79,14 @@ begin
           end if;
         -- Decode the word
         when DECODE =>
-          write_v(conn_bus);
+        --  write_v(conn_bus);
           opcode := conn_bus(8 downto 5);
           -- Perform an operation depending on the opcode
           case opcode is
+            when "0101" =>
+              ctrl_reg <= "111101010";
+              sending <= '1';
+              next_state <= SET_INREG;
             when "0110" =>
               ctrl_reg <= "111101001";
               sending <= '1';
@@ -87,6 +94,11 @@ begin
             when "0111" =>
               end_of_program <= '1';
               next_state <= IDLE;
+            when "1001" =>
+              sending <= '1';
+              ctrl_reg <= "111100010";
+              ram_addr <= conn_bus(4 downto 0);
+              next_state <= WAIT_FOR_PC;
             when others =>
               next_state <= IDLE;
           end case;
@@ -99,6 +111,28 @@ begin
             sending <= '1';           
             next_state <= SET_OUTREG;
           end if;
+        -- Call the inREG
+        -- When the REG entity receives a word, it asks the user to enter a number
+        when SET_INREG =>
+          sending <= '0';
+          if conn_bus = "ZZZZZZZZZ" then            
+            ctrl_reg <= "111101011";
+            sending <= '1';
+            next_state <= GET_INREG;
+          else
+            next_state <= SET_INREG;
+          end if;
+        -- Get the current value of the inREG
+        when GET_INREG =>
+          sending <= '0';
+          if conn_bus = "111101011" or conn_bus = "ZZZZZZZZZ" then
+            next_state <= GET_INREG;
+          else
+            sending <= '1';
+            acc <= conn_bus;
+            ctrl_reg <= "111101000";
+            next_state <= SET_AC;
+          end if;
         -- Update the value of the outREG
         when SET_OUTREG =>
           if conn_bus = "ZZZZZZZZZ" then
@@ -107,6 +141,38 @@ begin
             ctrl_reg <= value;
           else
             sending <= '0';
+          end if;
+        -- Update the value of the accumulator
+        when SET_AC =>
+          if conn_bus = "ZZZZZZZZZ" then
+            next_state <= IDLE;
+          elsif conn_bus = "111101000" then
+            ctrl_reg <= acc;
+          else
+            sending <= '0';
+          end if;
+        -- Let the PC know that there is going to be a jump
+        when WAIT_FOR_PC =>
+          ctrl_pulse <= '1';
+          next_state <= PC_JUMP;
+        when PC_JUMP =>
+          ctrl_pulse <= '0';
+          -- Set the new value of the PC
+          if conn_bus = "111100010" then
+            unsgn := (others => '0');
+            for i in 4 downto 0 loop
+              unsgn(i) := ram_addr(i);
+            end loop;
+            ctrl_reg <= std_logic_vector(unsgn);
+          -- Changing the PC done with success
+          elsif conn_bus = "ZZZZZZZZZ" then
+            ctrl_pulse <= '0';
+            next_state <= IDLE;
+          -- Call the PC again
+          else
+            sending <= '0';
+            ctrl_pulse <= '1';
+            next_state <= PC_JUMP;
           end if;
         when others =>
           next_state <= IDLE;
