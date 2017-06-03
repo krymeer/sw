@@ -157,7 +157,7 @@ Required syntax:
 0000NNNNN
 0000MMMMM
 ```
-Computing a sum of numbers ``NNNNN`` and ``MMMMM`` -- the result will be send on the bus.
+Computing a sum of numbers ``NNNNN`` and ``MMMMM`` ‒ the result will be send on the bus.
 
 ##### ALU (subtraction)
 Required syntax:
@@ -166,10 +166,10 @@ Required syntax:
 0000NNNNN
 0000MMMMM
 ```
-Computing a difference between numbers ``NNNNN`` and ``MMMMM`` -- the result will be send on the bus.
+Computing a difference between numbers ``NNNNN`` and ``MMMMM`` ‒ the result will be send on the bus.
 
 #### The controller
-When the file reading is done, the most important entity in the system -- the controller -- has to deal with instructions stored in the RAM. To be more precise, it goes like this:
+When the file reading is done, the most important entity in the system ‒ the controller ‒ has to deal with instructions stored in the RAM. To be more precise, it goes like this:
 1. Call the PC so as to get a currently pointed address;
 2. Start calling the RAM;
 3. Send the RAM an address of the word that you want to get;
