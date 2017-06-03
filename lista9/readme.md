@@ -35,7 +35,7 @@ Each element is connected with a special "address" (which is, frankly speaking, 
 | 111100011 | PC | skipping one of instructions |
 | 111100100 | REG | updating the MAR (*memory address register*) |
 | 111100101 | REG | getting the MAR value
-| 111100110 | REG | updating the MBR (*membory buffer register*) |
+| 111100110 | REG | updating the MBR (*memory buffer register*) |
 | 111100111 | REG | getting the MBR value |
 | 111101000 | REG | updating the accumulator (AC) |
 | 111101001 | REG | getting the value of the accumulator |
