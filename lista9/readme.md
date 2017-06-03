@@ -168,4 +168,4 @@ Currently implemented, supported and widely checked instructions:
 | 010100000 | Input | setting the accumulator to the entered value |
 | 011000000 | Output | printing the value of the accumulator |
 | 011100000 | Halt | terminating the program |
-| 1001``XXXXX`` | Load | loading ``XXXXX`` into the PC |
+| 1001XXXXX | Load | loading ``XXXXX`` into the PC |
