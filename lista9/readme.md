@@ -5,7 +5,7 @@ Author: Krzysztof Osada, 2017
 **Note**: this is my own version of the final task for the Embedded Systems course. Please be advised that the code was posted here only for security purposes, so if you cannot help stealing my bloody work, do it wisely and do not get me into *your* trouble.
 
 
-#### An example of the MARIE program 
+#### Examples of the MARIE programs
 A simple file which consists of 7 lines (numbered from 0 to 6).
 ```  
 #0 Load 4 
@@ -23,6 +23,23 @@ A simple file which consists of 7 lines (numbered from 0 to 6).
 #6 Memory location for the result
     000000000
 ```
+
+Final testing was performed on a sligthly modified version of the above file:
+```
+000101010 # Load 10
+001101011 # Add 11
+001001100 # Store 12
+000101100 # Load 12
+011000000 # Output
+010001010 # Subt 10
+001001100 # Store 12
+000101100 # Load 12
+011000000 # Output
+011100000 # Halt
+000010000
+000000111
+000000000
+``` 
 
 #### System entities
 Each element is connected with a special "address" (which is, frankly speaking, just a binary number) that helps identify a component without a doubt.
