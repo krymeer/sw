@@ -17,7 +17,7 @@ end controller;
 architecture arch of controller is
   -- Possible states of the controller
   -- THe list includes a few "dirty" workarounds, unfortunalely
-  type state_type is (IDLE, CALL_PC, CALL_RAM, SET_RAM_ADDR, SET_AC, GET_RAM_WORD, SET_INREG, GET_INREG, SET_OUTREG, OUTPUT_GET_AC, DECODE, PC_JUMP, WAIT_FOR_PC);
+  type state_type is (IDLE, CALL_PC, CALL_RAM, SET_RAM_ADDR, SET_AC, GET_RAM_WORD, SET_INREG, GET_INREG, SET_OUTREG, OUTPUT_GET_AC, DECODE, PC_JUMP, WAIT_FOR_PC, SKIP_GET_AC, SKIP, PC_CLR);
 
   -- Initial state of the entity
   signal current_state, next_state: state_type := IDLE;
@@ -29,6 +29,8 @@ architecture arch of controller is
   signal address, value, acc: std_logic_vector(8 downto 0);
 
   signal ram_addr: std_logic_vector(4 downto 0);
+
+  signal twobit: std_logic_vector(1 downto 0);
 
   -- Bus words: the first one which arrives, and the second one that could be returned
   signal word, ctrl_reg: std_logic_vector(8 downto 0) := (others => '0');
@@ -94,6 +96,11 @@ begin
             when "0111" =>
               end_of_program <= '1';
               next_state <= IDLE;
+            when "1000" =>
+              ctrl_reg <= "111101001";
+              sending <= '1';
+              twobit <= conn_bus(4 downto 3);
+              next_state <= SKIP_GET_AC;
             when "1001" =>
               sending <= '1';
               ctrl_reg <= "111100010";
@@ -151,6 +158,42 @@ begin
           else
             sending <= '0';
           end if;
+        -- Get the value of the accumulator and decide whether to skip next instruction
+        when SKIP_GET_AC =>
+          sending <= '0';
+          if conn_bus /= "111101001" and conn_bus /= "ZZZZZZZZZ" then
+            case twobit is
+              when "01" =>
+                -- AC = 0 and SKIPCOND = 100001000
+                if conn_bus = "000000000" then
+                  sending <= '1';
+                  ctrl_reg <= "111100011";
+                  next_state <= SKIP;
+                else
+                  next_state <= IDLE;
+                end if;
+              when "10" =>
+                -- AC > 0 and SKIPCOND = 100010000
+                if conn_bus /= "000000000" then
+                  sending <= '1';
+                  ctrl_reg <= "111100011";
+                  next_state <= SKIP;
+                else
+                  next_state <= IDLE;
+                end if;
+              when others =>
+                next_state <= IDLE;
+            end case;
+          end if;
+        -- Skip one instruction
+        when SKIP =>
+          ctrl_pulse <= '1';
+          next_state <= PC_CLR;
+        -- Stop forcible PC changing
+        when PC_CLR =>
+          sending <= '0';
+          ctrl_pulse <= '0';
+          next_state <= IDLE;
         -- Let the PC know that there is going to be a jump
         when WAIT_FOR_PC =>
           ctrl_pulse <= '1';
