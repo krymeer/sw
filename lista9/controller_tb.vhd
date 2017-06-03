@@ -107,10 +107,11 @@ begin
     while not endfile(marie_file) loop
       readline(marie_file, line_r);
       read(line_r, data_s);
-      -- Converting a string to a std_logic_vector
-      data_v := string_to_std_logic_vector(data_s);
 
-      -- Storing a value at an address in the memory
+      -- Convert a string to a std_logic_vector
+      data_v := string_to_std_logic_vector(data_s(1 to 9));
+
+      -- Store a value at an address in the memory
       conn_bus <= "111100001";
       wait for clk_period;
       conn_bus <= std_logic_vector(to_unsigned(ctr, conn_bus'length));
