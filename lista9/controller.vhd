@@ -17,13 +17,13 @@ end controller;
 architecture arch of controller is
   -- Possible states of the controller
   -- THe list includes a few "dirty" workarounds, unfortunalely
-  type state_type is (IDLE, CALL_PC, CALL_RAM, SET_RAM_ADDR, SET_MAR, SET_MBR, SET_AC, GET_RAM_WORD, SET_INREG, GET_INREG, SET_OUTREG, OUTPUT_GET_AC, DECODE, PC_JUMP, WAIT_FOR_PC, SKIP_GET_AC, SKIP, PC_CLR, CALL_RAM_FOR_MBR);
+  type state_type is (IDLE, CALL_PC, CALL_RAM, SET_RAM_ADDR, SET_MAR, SET_MBR, SET_AC, GET_RAM_WORD, SET_INREG, GET_INREG, SET_OUTREG, OUTPUT_GET_AC, DECODE, PC_JUMP, WAIT_FOR_PC, SKIP_GET_AC, SKIP, PC_CLR, CALL_RAM_FOR_MBR, CALL_AC_FOR_MBR, STORE, SET_RAM_FOR_STORE);
 
   -- Initial state of the entity
   signal current_state, next_state: state_type := IDLE;
 
   -- "Booleans" allowing or forbidding the entity to perform an action 
-  signal end_of_program, sending: std_logic := '0';
+  signal up_ac, mar_next, end_of_program, sending: std_logic := '0';
 
   -- An address at the memory (RAM), a value of the register, an accumulator value
   signal address, value, acc: std_logic_vector(8 downto 0);
@@ -94,6 +94,18 @@ begin
                 unsgn(i) := conn_bus(i);
               end loop;
               address <= std_logic_vector(unsgn);
+              mar_next <= '0';
+              ctrl_reg <= "111100100";
+              sending <= '1';
+              next_state <= SET_MAR;
+            -- Store
+            when "0010" =>
+              unsgn := (others => '0');
+              for i in 4 downto 0 loop
+                unsgn(i) := conn_bus(i);
+              end loop;
+              address <= std_logic_vector(unsgn);
+              mar_next <= '1';
               ctrl_reg <= "111100100";
               sending <= '1';
               next_state <= SET_MAR;
@@ -134,8 +146,23 @@ begin
             sending <= '0';
           else
             sending <= '1';
-            ctrl_reg <= "111100000";
-            next_state <= CALL_RAM_FOR_MBR;
+            if mar_next = '0' then
+              ctrl_reg <= "111100000";
+              next_state <= CALL_RAM_FOR_MBR;
+            else
+              ctrl_reg <= "111101001";
+              next_state <= CALL_AC_FOR_MBR;
+            end if;
+          end if;
+        -- Getting a current value of the accumulator
+        when CALL_AC_FOR_MBR =>
+          sending <= '0';
+          if conn_bus /= "111101001" and conn_bus /= "ZZZZZZZZZ" then
+            up_ac <= '0';
+            sending <= '1';
+            value <= conn_bus;
+            ctrl_reg <= "111100110";
+            next_state <= SET_MBR;
           end if;
         -- Calling the RAM entity so as to get a value
         when CALL_RAM_FOR_MBR =>
@@ -144,6 +171,7 @@ begin
           elsif conn_bus = address then
             sending <= '0';
           elsif conn_bus /= "ZZZZZZZZZ" then
+            up_ac <= '1';
             sending <= '1';
             value <= conn_bus;
             ctrl_reg <= "111100110";
@@ -157,10 +185,16 @@ begin
             sending <= '0';
           else
             sending <= '1';
-            acc <= value;
-            ctrl_reg <= "111101000";
             -- Update the accumulator
-            next_state <= SET_AC;
+            if up_ac = '1' then
+              acc <= value;
+              ctrl_reg <= "111101000";
+              next_state <= SET_AC;
+            -- Update the memory at a given address
+            else
+              ctrl_reg <= "111100001";
+              next_state <= SET_RAM_FOR_STORE;
+            end if;
           end if;
         -- When the value of the accumulator comes, call the outREG
         when OUTPUT_GET_AC =>
@@ -270,6 +304,18 @@ begin
             ctrl_pulse <= '1';
             next_state <= PC_JUMP;
           end if;
+        -- Call the RAM entity, set the given address and update the value
+        when SET_RAM_FOR_STORE =>
+          if conn_bus = "111100001" then
+            ctrl_reg <= address;
+          elsif conn_bus = address then
+            ctrl_reg <= value;
+            next_state <= STORE;
+          end if;
+        -- Finish the storing process
+        when STORE =>
+          sending <= '0';
+          next_state <= IDLE;
         when others =>
           next_state <= IDLE;
       end case;
