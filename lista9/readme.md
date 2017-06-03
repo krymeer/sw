@@ -165,8 +165,8 @@ Currently implemented, supported and widely checked instructions:
 
 | Word | Instruction | Further details | 
 | --------|---------|-------|
-| 0001AAAAA | Load | loading a value stored at the address ``AAAAA`` into PC |
-| 0010AAAAA | Store | storing a value of the accumulator at the address ``AAAAA`` |
+| 0001AAAAA | Load | loading contents of address ``AAAAA`` into PC |
+| 0010AAAAA | Store | storing a value of the accumulator at address ``AAAAA`` |
 | 010100000 | Input | setting the accumulator to the entered value |
 | 011000000 | Output | printing the value of the accumulator |
 | 011100000 | Halt | terminating the program |
