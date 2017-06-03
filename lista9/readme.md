@@ -165,7 +165,7 @@ Currently implemented, supported and widely checked instructions:
 
 | Word | Instruction | Further details | 
 | --------|---------|-------|
-| 0001XXXXX | Load | loading ``XXXXX`` into the PC |
+| 0001XXXXX | Load | loading ``XXXXX`` into PC |
 | 010100000 | Input | setting the accumulator to the entered value |
 | 011000000 | Output | printing the value of the accumulator |
 | 011100000 | Halt | terminating the program |
