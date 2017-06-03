@@ -82,7 +82,7 @@ Required syntax
 0000YYYYY
 ```
 where ``XXXXX`` - an address at the memory - is a binary value from 0 to 31.
-Last but not least, ``YYYYY`` is a value which will be stored in the RAM entity. **Note** that this number *cannot* be greater than 31 because it could be confused with operations (words starting with `0001`, `0010`,.., `1001`) or system entities' codes (words starting with `1111`).
+Last but not least, ``YYYYY`` is a value which will be stored in the RAM entity. **Note** that this number *cannot* be greater than 31 because it could be confused with operations (words starting with `0001`, `0010`, ..., `1001`) or system entities' codes (words starting with `1111`).
 
 ##### PC (jumping)
 Required syntax:
@@ -184,6 +184,7 @@ Required syntax:
 0000MMMMM
 ```
 Computing a difference between numbers ``NNNNN`` and ``MMMMM`` ‒ the result will be send on the bus.
+The first number ought to be **greater or equal** to the second one; otherwhise the ALU entity will return 0.
 
 #### The controller
 When the file reading is done, the most important entity in the system ‒ the controller ‒ has to deal with instructions stored in the RAM. To be more precise, it goes like this:
@@ -204,6 +205,8 @@ Currently implemented, supported and widely checked instructions:
 | --------|---------|-------|
 | 0001AAAAA | Load | loading contents of address ``AAAAA`` into PC |
 | 0010AAAAA | Store | storing a value of the accumulator at address ``AAAAA`` |
+| 0011AAAAA | Add | adding contents of address ``AAAAA`` to the value of the accumulator and storing the result in the accumulator |
+| 0100AAAAA | Subt | subtracting contents of address ``AAAAA`` from the value of the accumulator and storing the result in the accumulator |
 | 010100000 | Input | setting the accumulator to the entered value |
 | 011000000 | Output | printing the value of the accumulator |
 | 011100000 | Halt | terminating the program |
