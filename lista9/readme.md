@@ -43,7 +43,7 @@ Each element is connected with a special "address" (which is, frankly speaking, 
 | 111101011 | REG | getting the InREG value |
 | 111101100 | REG | updating the OutREG value |
 
-Most of actions must be performed in a special way:
+Most of actions must be performed in a proper order:
 
 #####  RAM (reading)
 Required syntax:
