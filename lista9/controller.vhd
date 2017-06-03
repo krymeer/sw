@@ -17,18 +17,18 @@ end controller;
 architecture arch of controller is
   -- Possible states of the controller
   -- THe list includes a few "dirty" workarounds, unfortunalely
-  type state_type is (IDLE, CALL_PC, CALL_RAM, SET_RAM_ADDR, SET_MAR, SET_MBR, SET_AC, GET_RAM_WORD, SET_INREG, GET_INREG, SET_OUTREG, OUTPUT_GET_AC, DECODE, PC_JUMP, WAIT_FOR_PC, SKIP_GET_AC, SKIP, PC_CLR, CALL_RAM_FOR_MBR, CALL_AC_FOR_MBR, STORE, SET_RAM_FOR_STORE);
+  type state_type is (IDLE, CALL_PC, CALL_RAM, SET_RAM_ADDR, SET_MAR, SET_MBR, SET_AC, GET_RAM_WORD, SET_INREG, GET_INREG, SET_OUTREG, OUTPUT_GET_AC, DECODE, PC_JUMP, WAIT_FOR_PC, WAIT_FOR_RAM, SKIP_GET_AC, SKIP, PC_CLR, CALL_RAM_FOR_MBR, CALL_AC_FOR_MBR, STORE, SET_RAM_FOR_STORE, ALU_GET_AC, ALU_ARGS, WAIT_FOR_ALU);
 
   -- Initial state of the entity
   signal current_state, next_state: state_type := IDLE;
 
   -- "Booleans" allowing or forbidding the entity to perform an action 
-  signal up_ac, mar_next, end_of_program, sending: std_logic := '0';
+  signal add_op, alu_sent, alu_op, up_ac, mar_next, end_of_program, sending: std_logic := '0';
 
-  -- An address at the memory (RAM), a value of the register, an accumulator value
-  signal address, value, acc: std_logic_vector(8 downto 0);
+  -- An address at the memory (RAM), a value of the register, an accumulator value, ALU args
+  signal address, value, acc, arg1, arg2: std_logic_vector(8 downto 0);
 
-  -- An adddress at the memory (being a part of the instruction)
+  -- An address at the memory (being a part of the instruction)
   signal ram_addr: std_logic_vector(4 downto 0);
 
   -- A value used with the skipcond instruction
@@ -83,6 +83,7 @@ begin
           end if;
         -- Decode the word
         when DECODE =>
+          alu_op <= '0';
         --  write_v(conn_bus);
           opcode := conn_bus(8 downto 5);
           -- Perform an operation depending on the opcode
@@ -106,6 +107,32 @@ begin
               end loop;
               address <= std_logic_vector(unsgn);
               mar_next <= '1';
+              ctrl_reg <= "111100100";
+              sending <= '1';
+              next_state <= SET_MAR;
+            -- Add
+            when "0011" =>
+              add_op <= '1';
+              alu_op <= '1';
+              unsgn := (others => '0');
+              for i in 4 downto 0 loop
+                unsgn(i) := conn_bus(i);
+              end loop;
+              address <= std_logic_vector(unsgn);
+              mar_next <= '0';
+              ctrl_reg <= "111100100";
+              sending <= '1';
+              next_state <= SET_MAR;
+            -- Subt
+            when "0100" =>
+              add_op <= '0';
+              alu_op <= '1';
+              unsgn := (others => '0');
+              for i in 4 downto 0 loop
+                unsgn(i) := conn_bus(i);
+              end loop;
+              address <= std_logic_vector(unsgn);
+              mar_next <= '0';
               ctrl_reg <= "111100100";
               sending <= '1';
               next_state <= SET_MAR;
@@ -170,12 +197,61 @@ begin
             ctrl_reg <= address;
           elsif conn_bus = address then
             sending <= '0';
-          elsif conn_bus /= "ZZZZZZZZZ" then
+            next_state <= WAIT_FOR_RAM;
+          end if;
+        -- Catching the value sent by the RAM entity
+        when WAIT_FOR_RAM =>
+          if conn_bus /= "ZZZZZZZZZ" then
             up_ac <= '1';
             sending <= '1';
             value <= conn_bus;
-            ctrl_reg <= "111100110";
-            next_state <= SET_MBR;
+            if alu_op = '1' then
+              -- The value on the bus is argument 2 for the ALU entity
+              arg2 <= conn_bus;
+              -- Get the value of the accumulator
+              ctrl_reg <= "111101001";
+              next_state <= ALU_GET_AC;
+            else
+              ctrl_reg <= "111100110";
+              next_state <= SET_MBR;
+            end if;
+          end if;
+        -- Getting the value of the accumulator for the ALU entity
+        when ALU_GET_AC =>
+          sending <= '0';
+          if conn_bus /= "ZZZZZZZZZ" and conn_bus /= "111101001" then 
+            -- The value of the accumulator
+            arg1 <= conn_bus;
+            -- Decide if an addition or a subtraction should be performed
+            sending <= '1';
+            if add_op = '1' then
+              ctrl_reg <= "111101101";
+            else
+              ctrl_reg <= "111101110";
+            end if;
+            next_state <= ALU_ARGS;
+          end if;
+        -- Sending arguments to perform an action in the ALU entity
+        when ALU_ARGS =>
+          if conn_bus = "111101101" or conn_bus = "111101110" then
+            ctrl_reg <= arg1;
+          else
+            ctrl_reg <= arg2;
+            next_state <= WAIT_FOR_ALU;
+          end if;
+        -- Getting the result computed by the ALU entity
+        when WAIT_FOR_ALU =>
+          sending <= '0';
+          if alu_sent = '0' and conn_bus = arg2 then
+            alu_sent <= '1';
+          end if;
+          -- Update the accumulator
+          if alu_sent = '1' and conn_bus /= "ZZZZZZZZZ" then
+            alu_sent <= '0';
+            sending <= '1';
+            acc <= conn_bus;
+            ctrl_reg <= "111101000";
+            next_state <= SET_AC;
           end if;
         -- Updating the value stored in MBR
         when SET_MBR =>
@@ -191,7 +267,7 @@ begin
               ctrl_reg <= "111101000";
               next_state <= SET_AC;
             -- Update the memory at a given address
-            else
+            elsif up_ac = '0' then
               ctrl_reg <= "111100001";
               next_state <= SET_RAM_FOR_STORE;
             end if;
@@ -205,8 +281,8 @@ begin
             sending <= '1';           
             next_state <= SET_OUTREG;
           end if;
-        -- Call the inREG
-        -- When the REG entity receives a word, it asks the user to enter a number
+        -- Call the inREG:
+        --- when the REG entity receives a word, it asks the user to enter a number
         when SET_INREG =>
           sending <= '0';
           if conn_bus = "ZZZZZZZZZ" then            

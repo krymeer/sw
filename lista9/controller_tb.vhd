@@ -45,6 +45,13 @@ architecture behaviour of controller_tb is
   );
   end component;
 
+  component alu is
+  port (
+    conn_bus: inout std_logic_vector(8 downto 0);
+    clk: in std_logic
+  );
+  end component;
+
   -- inout bus
   signal conn_bus: std_logic_vector(8 downto 0) := (others => 'Z');
 
@@ -83,6 +90,12 @@ begin
     conn_bus => conn_bus
   );
 
+  alu_entity: alu
+  port map(
+    clk => clk,
+    conn_bus => conn_bus
+  );
+
   -- clock process definition
   clk_process: process
   begin
@@ -103,7 +116,7 @@ begin
     wait for 100 ns;
 
     -- Reading contents of a given file
-    file_open(marie_file, "marie_input.txt", read_mode);
+    file_open(marie_file, "marie_main.txt", read_mode);
     while not endfile(marie_file) loop
       readline(marie_file, line_r);
       read(line_r, data_s);
