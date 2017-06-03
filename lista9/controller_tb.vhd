@@ -38,6 +38,7 @@ architecture behaviour of controller_tb is
   );
   end component;
 
+  -- The entity containing MAR, MBR, AC, inREG and outREG
   component reg is
   port (
     conn_bus: inout std_logic_vector(8 downto 0);
@@ -45,6 +46,7 @@ architecture behaviour of controller_tb is
   );
   end component;
 
+  -- ALU: performs an addition or a subtraction on a given pair of numbers
   component alu is
   port (
     conn_bus: inout std_logic_vector(8 downto 0);
@@ -122,6 +124,7 @@ begin
       read(line_r, data_s);
 
       -- Convert a string to a std_logic_vector
+      -- String ranges are useful when we want not to worry about comments
       data_v := string_to_std_logic_vector(data_s(1 to 9));
 
       -- Store a value at an address in the memory
