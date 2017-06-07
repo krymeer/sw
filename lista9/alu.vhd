@@ -29,38 +29,96 @@ architecture arch of alu is
   signal word, result: std_logic_vector(8 downto 0) := (others => '0');
 
   -- Two arguments for addition and subtraction operations
-  signal arg1, arg2: std_logic_vector(4 downto 0) := (others => '0');
+  signal arg1, arg2: std_logic_vector(8 downto 0) := (others => '0');
+
+  function subtract(n_1: in std_logic_vector; n_2: std_logic_vector) return std_logic_vector;
 
   -- Computing a sum of two numbers
   function add(n_1: in std_logic_vector; n_2: in std_logic_vector) return std_logic_vector is
     variable carry: std_logic_vector(4 downto 0) := (others => '0');
-    variable sum: std_logic_vector(8 downto 0) := (others => '0');
+    variable arg_1, arg_2, sum_result: std_logic_vector(8 downto 0) := (others => '0');
   begin
+    arg_1 := n_1; arg_2 := n_2;
+    -- If number 1 is negative, perform a "reverted" subtraction
+    -- Treat a sign of number 1 as a binary operator, too
+    if arg_1(8) = '1' and arg_2(8) = '0' then
+      arg_1(8) := '0'; arg_1(7) := '0';
+      return subtract(arg_2, arg_1);
+    -- If number 2 is negative, treat its sign as a binary operator
+    elsif arg_1(8) = '0' and arg_2(8) = '1' then
+      arg_2(8) := '0'; arg_2(7) := '0';
+      return subtract(arg_1, arg_2);
+    -- If both of numbers are negative, change prefix "00" to "11"
+    elsif arg_1(8) = '1' and arg_2(8) = '1' then
+      sum_result(8) := '1'; sum_result(7) := '1';
+    end if;
+
     for i in 0 to 4 loop
-      sum(i) := carry(i) xor n_1(i) xor n_2(i);
+      sum_result(i) := carry(i) xor n_1(i) xor n_2(i);
       if i < 4 then
         carry(i+1) := (n_1(i) and n_2(i)) or (n_1(i) and carry(i)) or (n_2(i) and carry(i));
       end if;
     end loop; 
-    return sum;
+    return sum_result;
   end add;
 
-  -- Computing a difference between two numbers (providing that A >= B)
+  -- Computing a difference between two numbers
   function subtract(n_1: in std_logic_vector; n_2: std_logic_vector) return std_logic_vector is
     variable borrow: std_logic_vector(4 downto 0) := (others => '0');
-    variable difference: std_logic_vector(8 downto 0) := (others => '0');
+    variable arg_1, arg_2, tmp, difference: std_logic_vector(8 downto 0) := (others => '0');
+    variable negative_result: std_logic := '0';
   begin
-    if n_1 = "000000000" then
-      return n_2;
-    elsif n_1 < n_2 then
+    arg_1 := n_1; arg_2 := n_2;
+    -- The first argument is equal to the second one
+    if arg_1 = arg_2 then
       return "000000000";
+    -- Number one positive, number two negative
+    elsif arg_1(8) = '0' and arg_2(8) = '1' then
+      tmp := arg_2;
+      tmp(8) := '0'; tmp(7) := '0';
+      return add(arg_1, tmp);
+    -- Number one negative, number two positive
+    elsif arg_1(8) = '1' and arg_2(8) = '0' then
+      tmp := arg_1;
+      tmp(8) := '0'; tmp(7) := '0';
+      difference := add(tmp, arg_2);
+      difference(8) := '1'; difference(7) := '1';
+      return difference;
+    -- If both of numbers are negative, swap them
+    -- Number 2 becomes posivite as well
+    elsif arg_1(8) = '1' and arg_2(8) = '1' then
+      tmp := arg_2;
+      tmp(8) := '0'; tmp(7) := '0';
+      -- If the absolute value of number 2 is greater than the absolute value of number 1, swap them
+      if arg_2(4 downto 0) > arg_1(4 downto 0) then
+        arg_2 := arg_1;
+        arg_1 := tmp;
+      -- Otherwise
+      else
+        negative_result := '1';
+      end if;
+    -- Both of numbers are positive
+    elsif arg_1(8) = '0' and arg_2(8) = '0' then
+      -- If number 2 is greater than number 1, swap them
+      if arg_2 > arg_1 then
+        negative_result := '1';
+        tmp := arg_2;
+        arg_2 := arg_1;
+        arg_1 := tmp;
+      end if;
     end if;
+
     for k in 0 to 4 loop
-      difference(k) := n_1(k) xor n_2(k) xor borrow(k);
+      difference(k) := arg_1(k) xor arg_2(k) xor borrow(k);
       if k < 4 then
-        borrow(k+1) := (not(n_1(k) xor n_2(k)) and borrow(k)) or (not(n_1(k)) and n_2(k));
+        borrow(k+1) := (not(arg_1(k) xor arg_2(k)) and borrow(k)) or (not(arg_1(k)) and arg_2(k));
       end if;
     end loop;
+
+    -- The result is negative, so it starts from "1100"
+    if negative_result = '1' then
+      difference(8) := '1'; difference(7) := '1';
+    end if;
     return difference;
   end subtract;
 
@@ -100,10 +158,10 @@ begin
       when CATCH =>
         if two_numbers = '0' then
           two_numbers <= '1';
-          arg1 <= conn_bus(4 downto 0);
+          arg1 <= conn_bus;--(4 downto 0);
         elsif two_numbers = '1' then
           two_numbers <= '0';
-          arg2 <= conn_bus(4 downto 0);
+          arg2 <= conn_bus;--(4 downto 0);
           if sum = '1' then
             next_state <= ADD;
           else
