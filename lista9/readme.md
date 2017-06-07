@@ -186,7 +186,7 @@ Required syntax:
 Computing a difference between numbers ``NNNNN`` and ``MMMMM`` ‒ the result will be send on the bus.
 ~~The first number ought to be **greater or equal** to the second one; otherwhise the ALU entity will return 0.~~
 
-The ALU unit is able to ‒ or at least should be ‒ work with negative numbers as well. Because a number of bits for a value is rather limited, its sign is indicated in a slightly atypical way. Move to the **last section** if you want know more about it. 
+The ALU unit is able to ‒ or at least should be ‒ work with negative numbers as well. Because a number of bits for a value is rather limited, its sign is indicated in a not so typical way. Move to the **last section** if you want know more about it. 
 
 #### The controller
 When the file reading is done, the most important entity in the system ‒ the controller ‒ has to deal with instructions stored in the RAM. To be more precise, it goes like this:
