@@ -212,3 +212,6 @@ Currently implemented, supported and widely checked instructions:
 | 011100000 | Halt | terminating the program |
 | 1000ZZ000 | Skipcond | skipping next instruction on condition ``ZZ`` |
 | 1001AAAAA | Jump | changing the value of PC to ``AAAAA`` |
+
+#### Negative numbers
+In order to enable ``Skipcond`` to work properly, I found that I have to introduce negative integers. To make things simpler, they are store in the memory in a sophisticated fashion: each of them is preceeded by prefix ``1100``. E.g. the notation of -2 is ``110000010``, -17 - ``110010001`` etc.
