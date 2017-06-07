@@ -184,7 +184,7 @@ Required syntax:
 0000MMMMM
 ```
 Computing a difference between numbers ``NNNNN`` and ``MMMMM`` ‒ the result will be send on the bus.
-The first number ought to be **greater or equal** to the second one; otherwhise the ALU entity will return 0.
+~~The first number ought to be **greater or equal** to the second one; otherwhise the ALU entity will return 0.~~
 
 #### The controller
 When the file reading is done, the most important entity in the system ‒ the controller ‒ has to deal with instructions stored in the RAM. To be more precise, it goes like this:
@@ -214,4 +214,4 @@ Currently implemented, supported and widely checked instructions:
 | 1001AAAAA | Jump | changing the value of PC to ``AAAAA`` |
 
 #### Negative numbers
-In order to enable ``Skipcond`` to work properly, I found that I have to introduce negative integers. To make things simpler, they are store in the memory in a sophisticated fashion: each of them is preceeded by prefix ``1100``. E.g. the notation of -2 is ``110000010``, -17 - ``110010001`` etc.
+In order to enable ``Skipcond`` to work properly, I found that I have to introduce negative integers. To make things simpler, they are store in the memory in a sophisticated fashion: each of them is preceeded by prefix ``1100``. E.g. the notation of -2 is ``110000010``, -17 is equal to ``110010001`` etc.
