@@ -118,7 +118,7 @@ begin
     wait for 100 ns;
 
     -- Reading contents of a given file
-    file_open(marie_file, "marie_main.txt", read_mode);
+    file_open(marie_file, "input.txt", read_mode);
     while not endfile(marie_file) loop
       readline(marie_file, line_r);
       read(line_r, data_s);
