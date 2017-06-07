@@ -175,7 +175,6 @@ Required syntax:
 0000MMMMM
 ```
 Computing a sum of numbers ``NNNNN`` and ``MMMMM`` ‒ the result will be send on the bus.
-
 **Note** that if the result of the addition is greater than 31, an overflow occurs and the ALU entity returns 0.
 
 ##### ALU (subtraction)
