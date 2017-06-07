@@ -14,10 +14,10 @@ architecture arch of alu is
 
   -- Possible states of the ALU entity:
   --- IDLE: nothing new happens
-  --- CATCH: store arguments for the operation
+  --- CATCH_FIRST, CATCH_SECOND: store arguments for the operation
   --- ADD: perform the addition
   --- SUBT: perform the subtraction
-  type state_type is (IDLE, CATCH, ADD, SUBT);
+  type state_type is (IDLE, CATCH_FIRST, CATCH_SECOND, ADD, SUBT);
 
   -- Initial state of the entity
   signal current_state, next_state: state_type := IDLE;
@@ -58,7 +58,13 @@ architecture arch of alu is
       if i < 4 then
         carry(i+1) := (n_1(i) and n_2(i)) or (n_1(i) and carry(i)) or (n_2(i) and carry(i));
       end if;
-    end loop; 
+    end loop;
+
+    -- If the result of the addition is less than any of the arguments, an overflow occurred
+    if sum_result < arg_1 or sum_result < arg_2 then
+      sum_result := (others => '0');
+    end if;
+
     return sum_result;
   end add;
 
@@ -71,7 +77,7 @@ architecture arch of alu is
     arg_1 := n_1; arg_2 := n_2;
     -- The first argument is equal to the second one
     if arg_1 = arg_2 then
-      return "000000000";
+      return difference;
     -- Number one positive, number two negative
     elsif arg_1(8) = '0' and arg_2(8) = '1' then
       tmp := arg_2;
@@ -119,6 +125,7 @@ architecture arch of alu is
     if negative_result = '1' then
       difference(8) := '1'; difference(7) := '1';
     end if;
+
     return difference;
   end subtract;
 
@@ -144,29 +151,29 @@ begin
             -- Addition
             when "111101101" => 
               sum <= '1';
-              next_state <= CATCH;
+              next_state <= CATCH_FIRST;
             -- Subtraction
             when "111101110" => 
               sum <= '0';
-              next_state <= CATCH;
+              next_state <= CATCH_FIRST;
             when others
               => next_state <= IDLE;
           end case;
         end if;
         sending <= '0';
-      -- Store the arguments for the operation
-      when CATCH =>
-        if two_numbers = '0' then
-          two_numbers <= '1';
-          arg1 <= conn_bus;--(4 downto 0);
-        elsif two_numbers = '1' then
-          two_numbers <= '0';
-          arg2 <= conn_bus;--(4 downto 0);
-          if sum = '1' then
-            next_state <= ADD;
-          else
-            next_state <= SUBT;
-          end if;
+      -- Store the first argument for the operation
+      when CATCH_FIRST =>
+        arg1 <= conn_bus;
+        -- Change the state so as to catch an another number
+        next_state <= CATCH_SECOND;
+      -- Store the second argument for the operation
+      when CATCH_SECOND =>
+        arg2 <= conn_bus;
+        -- Decide what to do next
+        if sum = '1' then
+          next_state <= ADD;
+        else
+          next_state <= SUBT;
         end if;
       -- Perform the addition and return the result
       when ADD =>

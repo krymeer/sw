@@ -235,7 +235,7 @@ begin
         when ALU_ARGS =>
           if conn_bus = "111101101" or conn_bus = "111101110" then
             ctrl_reg <= arg1;
-          else
+          else  
             ctrl_reg <= arg2;
             next_state <= WAIT_FOR_ALU;
           end if;
@@ -326,6 +326,15 @@ begin
           sending <= '0';
           if conn_bus /= "111101001" and conn_bus /= "ZZZZZZZZZ" then
             case twobit is
+              when "00" =>
+                -- AC < 0 and SKIPCOND = 100000000
+                if conn_bus(8) = '1' and conn_bus(7) = '1' then
+                  sending <= '1';
+                  ctrl_reg <= "111100011";
+                  next_state <= SKIP;
+                else
+                  next_state <= IDLE;
+                end if;
               when "01" =>
                 -- AC = 0 and SKIPCOND = 100001000
                 if conn_bus = "000000000" then
